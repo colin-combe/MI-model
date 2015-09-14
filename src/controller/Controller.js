@@ -24,12 +24,12 @@ var DNA = require('../model/molecule/DNA');
 var RNA = require('../model/molecule/RNA');
 var Complex = require('../model/molecule/Complex');
 var MoleculeSet = require('../model/molecule/MoleculeSet');
-var Link = require('../model/link/Link');
+//~ var Link = require('../model/link/Link');
 var NaryLink = require('../model/link/NaryLink');
 var FeatureLink = require('../model/link/FeatureLink');
-var SequenceDatum = require('../model/link/SequenceDatum');
-var BinaryLink = require('../model/link/BinaryLink');
-var UnaryLink = require('../model/link/UnaryLink');
+var Feature = require('../model/feature/Feature');
+//~ var BinaryLink = require('../model/link/BinaryLink');
+//~ var UnaryLink = require('../model/link/UnaryLink');
 var Expand = require ('./Expand');
 var Config = require('./Config');
 //for save file.
@@ -55,16 +55,17 @@ xiNET.Controller = function(targetDiv) {
     this.svgElement.setAttribute("width", "100%");
     this.svgElement.setAttribute("height", "100%");
     this.svgElement.setAttribute("style", "display:block;");
+    
     //add listeners
     var self = this;
-    this.svgElement.onmousedown = function(evt) {self.mouseDown(evt);};
-    this.svgElement.onmousemove = function(evt) {self.mouseMove(evt);};
-    this.svgElement.onmouseup = function(evt) {self.mouseUp(evt);};
-    this.svgElement.onmouseout = function(evt) {self.hideTooltip(evt);};
-    this.lastMouseUp = new Date().getTime();
-    this.svgElement.ontouchstart = function(evt) {self.touchStart(evt);};
-    this.svgElement.ontouchmove = function(evt) {self.touchMove(evt);};
-    this.svgElement.ontouchend = function(evt) {self.touchEnd(evt);};
+    //~ this.svgElement.onmousedown = function(evt) {self.mouseDown(evt);};
+    //~ this.svgElement.onmousemove = function(evt) {self.mouseMove(evt);};
+    //~ this.svgElement.onmouseup = function(evt) {self.mouseUp(evt);};
+    //~ this.svgElement.onmouseout = function(evt) {self.hideTooltip(evt);};
+    //~ this.lastMouseUp = new Date().getTime();
+    //~ this.svgElement.ontouchstart = function(evt) {self.touchStart(evt);};
+    //~ this.svgElement.ontouchmove = function(evt) {self.touchMove(evt);};
+    //~ this.svgElement.ontouchend = function(evt) {self.touchEnd(evt);};
 
     //legend changed callbacks
     this.legendCallbacks = new Array();
@@ -204,68 +205,71 @@ xiNET.Controller.prototype.readMIJSON = function(miJson, expand) {
 	var needsSequence = d3.set();//things that need seq looked up
 	expand? readStoichExpanded() : readStoichUnexpanded();
 
-	// loop through particpants and features
-	// init binary, unary and feature links,
-	// and make needed associations between these and containing naryLink
-	for (var l = 0; l < dataElementCount; l++) {
-			var interaction = data[l];
-			if (interaction.object === 'interaction') {
-			var jsonParticipants = interaction.participants;
-			var participantCount = jsonParticipants.length
-
-			for (var pi = 0; pi < participantCount; pi++){
-				var jsonParticipant = jsonParticipants[pi];
-				var features = new Array(0);
-				if (jsonParticipant.features) features = jsonParticipant.features;
-
-				var fCount = features.length;
-				for (var f = 0; f < fCount; f++){
-					var feature = features[f];
-					var fromSequenceData = feature.sequenceData;
-					if (feature.linkedFeatures) {
-						var linkedFeatureIDs = feature.linkedFeatures;
-						// break feature links to different nodes into seperate binary links
-						var toSequenceData_indexedByNodeId = d3.map();
-						var linkedFeatureCount = linkedFeatureIDs.length;
-						for (var lfi = 0; lfi < linkedFeatureCount; lfi++){
-							var linkedFeature = self.features.get(linkedFeatureIDs[lfi])
-							var seqDataCount = linkedFeature.sequenceData.length;
-							for (var s = 0; s < seqDataCount; s++){
-								var seqData = linkedFeature.sequenceData[s];
-								var nodeId = seqData.interactorRef;
-								if (expand) {
-									nodeId = nodeId + '(' + seqData.participantRef + ')';
-								}
-								var toSequenceData = toSequenceData_indexedByNodeId.get(nodeId);
-								if (typeof toSequenceData === 'undefined'){
-									toSequenceData = new Array();
-									toSequenceData_indexedByNodeId.set(nodeId, toSequenceData);
-								}
-								toSequenceData = toSequenceData.push(seqData)
-							}
-						}
-						var countEndNodes = toSequenceData_indexedByNodeId.values().length;
-						for (var n = 0; n < countEndNodes; n++) {
-							toSequenceData = toSequenceData_indexedByNodeId.values()[n];
-							var fromMolecule = getNode(fromSequenceData[0]);
-							var toMolecule = getNode(toSequenceData[0]);
-							var link;
-							if (fromMolecule === toMolecule){
-								link = getUnaryLink(fromMolecule, interaction);
-							}
-							else {
-								link = getBinaryLink(fromMolecule, toMolecule, interaction);
-							}
-							var sequenceLink = getFeatureLink(fromSequenceData, toSequenceData, interaction);
-							fromMolecule.sequenceLinks.set(sequenceLink.id, sequenceLink);
-							toMolecule.sequenceLinks.set(sequenceLink.id, sequenceLink);
-							link.sequenceLinks.set(sequenceLink.id, sequenceLink);
-						}
-					}
-				}
-			}
-		}
-	}
+	/* 
+	 * loop through particpants and features
+	 * init binary, unary and feature links,
+	 * and make needed associations between these and containing naryLink
+	 */
+	 
+	//~ for (var l = 0; l < dataElementCount; l++) {//for each interaction
+			//~ var interaction = data[l];
+			//~ if (interaction.object === 'interaction') {
+				//~ var jsonParticipants = interaction.participants;
+				//~ var participantCount = jsonParticipants.length
+//~ 
+				//~ for (var pi = 0; pi < participantCount; pi++){// for each particpant
+					//~ var jsonParticipant = jsonParticipants[pi];
+					//~ var features = new Array(0);
+					//~ if (jsonParticipant.features) features = jsonParticipant.features;
+//~ 
+					//~ var fCount = features.length;
+					//~ for (var f = 0; f < fCount; f++){// for each feature
+						//~ var feature = features[f];
+						//~ var fromSequenceData = feature.sequenceData;
+						//~ if (feature.linkedFeatures) {
+							//~ var linkedFeatureIDs = feature.linkedFeatures;
+							//~ // break feature links to different nodes into seperate binary links
+							//~ var toSequenceData_indexedByNodeId = d3.map();
+							//~ var linkedFeatureCount = linkedFeatureIDs.length;
+							//~ for (var lfi = 0; lfi < linkedFeatureCount; lfi++){
+								//~ var linkedFeature = self.features.get(linkedFeatureIDs[lfi])
+								//~ var seqDataCount = linkedFeature.sequenceData.length;
+								//~ for (var s = 0; s < seqDataCount; s++){
+									//~ var seqData = linkedFeature.sequenceData[s];
+									//~ var nodeId = seqData.interactorRef;
+									//~ if (expand) {
+										//~ nodeId = nodeId + '(' + seqData.participantRef + ')';
+									//~ }
+									//~ var toSequenceData = toSequenceData_indexedByNodeId.get(nodeId);
+									//~ if (typeof toSequenceData === 'undefined'){
+										//~ toSequenceData = new Array();
+										//~ toSequenceData_indexedByNodeId.set(nodeId, toSequenceData);
+									//~ }
+									//~ toSequenceData = toSequenceData.push(seqData)
+								//~ }
+							//~ }
+							//~ var countEndNodes = toSequenceData_indexedByNodeId.values().length;
+							//~ for (var n = 0; n < countEndNodes; n++) {
+								//~ toSequenceData = toSequenceData_indexedByNodeId.values()[n];
+								//~ var fromMolecule = getNode(fromSequenceData[0]);
+								//~ var toMolecule = getNode(toSequenceData[0]);
+								//~ var link;
+								//~ if (fromMolecule === toMolecule){
+									//~ link = getUnaryLink(fromMolecule, interaction);
+								//~ }
+								//~ else {
+									//~ link = getBinaryLink(fromMolecule, toMolecule, interaction);
+								//~ }
+								//~ var sequenceLink = getFeatureLink(fromSequenceData, toSequenceData, interaction);
+								//~ fromMolecule.sequenceLinks.set(sequenceLink.id, sequenceLink);
+								//~ toMolecule.sequenceLinks.set(sequenceLink.id, sequenceLink);
+								//~ link.sequenceLinks.set(sequenceLink.id, sequenceLink);
+							//~ }
+						//~ }
+					//~ }
+				//~ }
+		//~ }
+	//~ }
 
 	//init complexes
 	var complexes = complexes.values()
@@ -292,49 +296,49 @@ xiNET.Controller.prototype.readMIJSON = function(miJson, expand) {
 	self.initLayout();
 
 	//make mi features into annotations
-	var features = self.features.values();
-	var fCount = features.length;
-	for (var f = 0; f < fCount; f++){
-		var feature = features[f];
-		// add features to interactors/participants/nodes
-		var annotName = "";
-		if (typeof feature.name !== 'undefined') {
-			annotName += feature.name + ', ';
-		}
-		if (typeof feature.type !== 'undefined') {
-			annotName += feature.type.name;
-		}
-		if (typeof feature.detmethod !== 'undefined') {
-			annotName += ', ' + feature.detmethod.name;
-		}
-		//~ var colour = Molecule.domainColours(feature.name);
-		// the id info we need is inside sequenceData att
-		if (feature.sequenceData) {
-			//~ console.log(JSON.stringify(feature, null, '\t'));
-			var seqData = feature.sequenceData;
-			var seqDataCount = seqData.length;
-			for (var sdi = 0; sdi < seqDataCount; sdi++) {
-				var seqDatum = seqData[sdi];
-				var mID = seqDatum.interactorRef;
-				if (expand)	{
-					mID = mID	+ "(" + seqDatum.participantRef + ")";
-				}
-				var molecule = self.molecules.get(mID);
-				var sequenceRegex = /(.+)-(.+)/;
-				var match = sequenceRegex.exec(seqDatum.pos);
-				var startRes = match[1] * 1;
-				var endRes = match[2] * 1;
-				if (isNaN(startRes) === false && isNaN(endRes) === false) {
-					var annotation = new Annotation(annotName, startRes, endRes);
-					if (molecule.miFeatures == null) {
-						molecule.miFeatures = new Array();
-					}
-					molecule.miFeatures.push(annotation);
-	//				console.log(molecule.id);
-				}
-			}
-		}
-	}
+	//~ var features = self.features.values();
+	//~ var fCount = features.length;
+	//~ for (var f = 0; f < fCount; f++){
+		//~ var feature = features[f];
+		//~ // add features to interactors/participants/nodes
+		//~ var annotName = "";
+		//~ if (typeof feature.name !== 'undefined') {
+			//~ annotName += feature.name + ', ';
+		//~ }
+		//~ if (typeof feature.type !== 'undefined') {
+			//~ annotName += feature.type.name;
+		//~ }
+		//~ if (typeof feature.detmethod !== 'undefined') {
+			//~ annotName += ', ' + feature.detmethod.name;
+		//~ }
+		//~ // var colour = Molecule.domainColours(feature.name);
+		//~ // the id info we need is inside sequenceData att
+		//~ if (feature.sequenceData) {
+		//	console.log(JSON.stringify(feature, null, '\t'));
+			//~ var seqData = feature.sequenceData;
+			//~ var seqDataCount = seqData.length;
+			//~ for (var sdi = 0; sdi < seqDataCount; sdi++) {
+				//~ var seqDatum = seqData[sdi];
+				//~ var mID = seqDatum.interactorRef;
+				//~ if (expand)	{
+					//~ mID = mID	+ "(" + seqDatum.participantRef + ")";
+				//~ }
+				//~ var molecule = self.molecules.get(mID);
+				//~ var sequenceRegex = /(.+)-(.+)/;
+				//~ var match = sequenceRegex.exec(seqDatum.pos);
+				//~ var startRes = match[1] * 1;
+				//~ var endRes = match[2] * 1;
+				//~ if (isNaN(startRes) === false && isNaN(endRes) === false) {
+					//~ var annotation = new Annotation(annotName, startRes, endRes);
+					//~ if (molecule.miFeatures == null) {
+						//~ molecule.miFeatures = new Array();
+					//~ }
+					//~ molecule.miFeatures.push(annotation);
+	//~ //				console.log(molecule.id);
+				//~ }
+			//~ }
+		//~ }
+	//~ }
 
 	//lookup missing sequences
 	var nsIds = needsSequence.values();
@@ -510,7 +514,7 @@ xiNET.Controller.prototype.readMIJSON = function(miJson, expand) {
 
 	function indexFeatures(){
 		//create indexed collection of all features from interactions
-		// - still seems like a good starting point?
+		// - still seems like a good starting point
 		for (var l = 0; l < dataElementCount; l++) {
 			var interaction = data[l];
 			if (interaction.object === 'interaction') {
@@ -523,7 +527,7 @@ xiNET.Controller.prototype.readMIJSON = function(miJson, expand) {
 					var fCount = features.length;
 					for (var f = 0; f < fCount; f++){
 						var feature = features[f];
-						self.features.set(feature.id, feature);
+						self.features.set(feature.id, new Feature(feature));
 					}
 				}
 			}
@@ -1249,6 +1253,16 @@ xiNET.Controller.prototype.clearSelection = function() {
     }
 };
 
+
+// transform the mouse-position into a position on the svg
+xiNET.Controller.prototype.mouseToSVG = function(x, y) {
+    var p = this.svgElement.createSVGPoint();
+    p.x = x;
+    p.y = y;
+    var p = p.matrixTransform(this.container.getCTM().inverse());
+    return p;
+};
+
 //gets mouse position
 xiNET.Controller.prototype.getEventPoint = function(evt) {
     var p = this.svgElement.createSVGPoint();
@@ -1262,165 +1276,6 @@ xiNET.Controller.prototype.getEventPoint = function(evt) {
     p.x = evt.pageX - left;
     p.y = evt.pageY - top;
     return p;
-};
-
-// transform the mouse-position into a position on the svg
-xiNET.Controller.prototype.mouseToSVG = function(x, y) {
-    var p = this.svgElement.createSVGPoint();
-    p.x = x;
-    p.y = y;
-    var p = p.matrixTransform(this.container.getCTM().inverse());
-    return p;
-};
-
-//stop event propogation and defaults; only do what we ask
-xiNET.Controller.prototype.preventDefaultsAndStopPropagation = function(evt) {
-    if (evt.stopPropagation)
-        evt.stopPropagation();
-    if (evt.cancelBubble != null)
-        evt.cancelBubble = true;
-    if (evt.preventDefault)
-        evt.preventDefault();
-};
-
-
-/**
- * Handle touchstart event.
- */
-xiNET.Controller.prototype.touchStart = function(evt) {
-    //prevent default, but allow propogation
-    evt.preventDefault();
-    //~ //evt.returnValue = false;
-    //~ this.preventDefaultsAndStopPropagation(evt);
-
-    //stop force layout
-    if (typeof this.force !== 'undefined' && this.force != null) {
-        this.force.stop();
-    }
-
-    var p = this.getTouchEventPoint(evt);// seems to be correct, see below
-	this.dragStart = this.mouseToSVG(p.x, p.y);
-    this.state = MouseEventCodes.PANNING;
-    //~ this.panned = false;
-};
-
-// dragging/rotation/panning/selecting
-xiNET.Controller.prototype.touchMove = function(evt) {
-    if (this.sequenceInitComplete) { // just being cautious
-        var p = this.getTouchEventPoint(evt);// seems to be correct, see below
-        var c = this.mouseToSVG(p.x, p.y);
-
-        if (this.dragElement != null) { //dragging or rotating
-            this.hideTooltip();
-            var dx = this.dragStart.x - c.x;
-            var dy = this.dragStart.y - c.y;
-
-            if (this.state ===  MouseEventCodes.DRAGGING) {
-                // we are currently dragging things around
-                var ox, oy, nx, ny;
-                if (typeof this.dragElement.x === 'undefined') { // if not an Molecule
-                    var nodes = this.dragElement.interactors;
-                    var nodeCount = nodes.length;
-                    for (var i = 0; i < nodeCount; i++) {
-                        var protein = nodes[i];
-                        ox = protein.x;
-                        oy = protein.y;
-                        nx = ox - dx;
-                        ny = oy - dy;
-                        protein.setPosition(nx, ny);
-                        protein.setAllLinkCoordinates();
-                    }
-                    for (i = 0; i < nodeCount; i++) {
-                        nodes[i].setAllLinkCoordinates();
-                    }
-                } else {
-                    //its a protein - drag it TODO: DRAG SELECTED
-                    ox = this.dragElement.x;
-                    oy = this.dragElement.y;
-                    nx = ox - dx;
-                    ny = oy - dy;
-                    this.dragElement.setPosition(nx, ny);
-                    this.dragElement.setAllLinkCoordinates();
-                }
-                this.dragStart = c;
-            }
-
-            else if (this.state === MouseEventCodes.ROTATING) {
-                // Distance from mouse x and center of stick.
-                var _dx = c.x - this.dragElement.x
-                // Distance from mouse y and center of stick.
-                var _dy = c.y - this.dragElement.y;
-                //see http://en.wikipedia.org/wiki/Atan2#Motivation
-                var centreToMouseAngleRads = Math.atan2(_dy, _dx);
-                if (this.whichRotator === 0) {
-                    centreToMouseAngleRads = centreToMouseAngleRads + Math.PI;
-                }
-                var centreToMouseAngleDegrees = centreToMouseAngleRads * (360 / (2 * Math.PI));
-                this.dragElement.setRotation(centreToMouseAngleDegrees);
-                this.dragElement.setAllLinkCoordinates();
-            }
-            else { //not dragging or rotating yet, maybe we should start
-                // don't start dragging just on a click - we need to move the mouse a bit first
-                if (Math.sqrt(dx * dx + dy * dy) > (5 * this.z)) {
-                    this.state = MouseEventCodes.DRAGGING;
-
-                }
-            }
-        }
-
-//    else if (this.state ===  MouseEventCodes.SELECTING) {
-//        this.updateMarquee(this.marquee, c);
-//    }
-        else
-        {
-
-        // if (this.state === MouseEventCodes.PANNING) {
-            //~ xiNET.setCTM(this.container, this.container.getCTM()
-				//~ .translate(c.x - this.dragStart.x, c.y - this.dragStart.y));
-        // }
-        // else {
-           // // this.showTooltip(p);
-        // }
-		}
-    }
-    return false;
-};
-
-// this ends all dragging and rotating
-xiNET.Controller.prototype.touchEnd = function(evt) {
-	this.preventDefaultsAndStopPropagation(evt);
-	if (this.dragElement != null) {
-		if (!(this.state === MouseEventCodes.DRAGGING || this.state === MouseEventCodes.ROTATING)) { //not dragging or rotating
-           		if (typeof this.dragElement.x === 'undefined') { //if not protein
-					//this.dragElement.showID();
-				} else {
-					if (this.dragElement.form === 0) {
-						this.dragElement.setForm(1);
-					} else {
-						this.dragElement.setForm(0);
-					}
-				}
-			//~ this.checkLinks();
-		}
-		else if (this.state === MouseEventCodes.ROTATING) {
-			//round protein rotation to nearest 5 degrees (looks neater)
-			this.dragElement.setRotation(Math.round(this.dragElement.rotation / 5) * 5);
-		}
-		else {
-		} //end of protein drag; do nothing
-	}
-	//~ else if (/*this.state !== xiNET.Controller.PANNING &&*/ evt.ctrlKey === false) {
-		//~ this.clearSelection();
-	//~ }
-//~
-	//~ if (this.state === xiNET.Controller.SELECTING) {
-		//~ clearInterval(this.marcher);
-		//~ this.svgElement.removeChild(this.marquee);
-	//~ }
-	this.dragElement = null;
-	this.whichRotator = -1;
-	this.state = MouseEventCodes.MOUSE_UP;
-    return false;
 };
 
 //gets mouse position
@@ -1442,6 +1297,15 @@ xiNET.Controller.prototype.getTouchEventPoint = function(evt) {
     p.y = evt.touches[0].pageY - top;
  //~ var help = left;////evt.touches[0].pageX;//.toString();
    return p;
+};
+//stop event propogation and defaults; only do what we ask
+xiNET.Controller.prototype.preventDefaultsAndStopPropagation = function(evt) {
+    if (evt.stopPropagation)
+        evt.stopPropagation();
+    if (evt.cancelBubble != null)
+        evt.cancelBubble = true;
+    if (evt.preventDefault)
+        evt.preventDefault();
 };
 
 xiNET.Controller.prototype.showTooltip = function(p)
