@@ -13,7 +13,7 @@
 
 var Config = require('../../controller/Config');
 var Link = require('./Link');
-var SequenceLink = require('./SequenceLink');
+var FeatureLink = require('./FeatureLink');
 
 UnaryLink.prototype = new Link();
 

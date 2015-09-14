@@ -8,7 +8,7 @@
 
 var Config = require('../../controller/Config');
 var Link = require('./Link');
-var SequenceLink = require('./SequenceLink');
+var FeatureLink = require('./FeatureLink');
 //josh - following are libraries and should be in 'vendor'?
 //  but I don't know how to set up the dependency if its there
 var Intersection = require('intersectionjs');

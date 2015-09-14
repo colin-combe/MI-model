@@ -26,7 +26,7 @@ var Complex = require('../model/interactor/Complex');
 var MoleculeSet = require('../model/interactor/MoleculeSet');
 var Link = require('../model/link/Link');
 var NaryLink = require('../model/link/NaryLink');
-var SequenceLink = require('../model/link/SequenceLink');
+var FeatureLink = require('../model/link/FeatureLink');
 var SequenceDatum = require('../model/link/SequenceDatum');
 var BinaryLink = require('../model/link/BinaryLink');
 var UnaryLink = require('../model/link/UnaryLink');
@@ -162,7 +162,7 @@ xiNET.Controller.prototype.clear = function() {
     this.allNaryLinks = d3.map();
     this.allBinaryLinks = d3.map();
     this.allUnaryLinks = d3.map();
-    this.allSequenceLinks = d3.map();
+    this.allFeatureLinks = d3.map();
 
     this.proteinCount = 0;
     this.maxBlobRadius = 30;
@@ -691,7 +691,7 @@ xiNET.Controller.prototype.readMIJSON = function(miJson, expand) {
 			seqLinkId = end + '><' + start;
 			endsSwapped = true;
 		}
-		var sequenceLink = self.allSequenceLinks.get(seqLinkId);
+		var sequenceLink = self.allFeatureLinks.get(seqLinkId);
 		if (typeof sequenceLink === 'undefined') {
 			var fromFeaturePositions = new Array();
 			var seqDatumCount = fromSeqData.length;
@@ -704,11 +704,11 @@ xiNET.Controller.prototype.readMIJSON = function(miJson, expand) {
 				toFeaturePositions.push(new SequenceDatum(getNode(toSeqData[i]), toSeqData[i].pos));
 			}
 			//~ if (endsSwapped === false) {
-				sequenceLink = new SequenceLink(seqLinkId, fromFeaturePositions, toFeaturePositions, self, interaction);
+				sequenceLink = new FeatureLink(seqLinkId, fromFeaturePositions, toFeaturePositions, self, interaction);
 			//~ }else {
-				//~ sequenceLink = new SequenceLink(seqLinkId, toFeaturePositions, fromFeaturePositions, self, interaction);
+				//~ sequenceLink = new FeatureLink(seqLinkId, toFeaturePositions, fromFeaturePositions, self, interaction);
 			//~ }
-   			self.allSequenceLinks.set(seqLinkId, sequenceLink);
+   			self.allFeatureLinks.set(seqLinkId, sequenceLink);
 		}
 
 		sequenceLink.addEvidence(interaction);
@@ -772,7 +772,7 @@ xiNET.Controller.prototype.checkLinks = function() {
 	checkAll(this.allNaryLinks);
 	checkAll(this.allBinaryLinks);
 	checkAll(this.allUnaryLinks);
-	checkAll(this.allSequenceLinks);
+	checkAll(this.allFeatureLinks);
 };
 
 xiNET.Controller.prototype.setAllLinkCoordinates = function() {
@@ -787,7 +787,7 @@ xiNET.Controller.prototype.setAllLinkCoordinates = function() {
 	setAll(this.allBinaryLinks);
 	setAll(this.allUnaryLinks);
     if (this.sequenceInitComplete) {
-		setAll(this.allSequenceLinks);
+		setAll(this.allFeatureLinks);
 	}
 };
 
