@@ -11,7 +11,7 @@
 "use strict";
 
 function xiNET_Storage() {}
-var Annotation = require('../model/interactor/Annotation');
+var Annotation = require('../model/molecule/Annotation');
 
 xiNET_Storage.ns = "xiNET.";
 

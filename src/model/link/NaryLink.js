@@ -14,7 +14,7 @@
 var colorbrewer = require('colorbrewer');
 var Link = require('./Link');
 var Config = require('../../controller/Config');
-var Molecule = require('../interactor/Molecule');
+var Molecule = require('../molecule/Molecule');
 
 NaryLink.naryColours = d3.scale.ordinal().range(colorbrewer.Paired[6]);//d3.scale.category20c();//d3.scale.ordinal().range(colorbrewer.Paired[12]);//
 NaryLink.orbitNodes = 16;
