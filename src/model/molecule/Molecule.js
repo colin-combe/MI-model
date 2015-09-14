@@ -10,7 +10,8 @@
 
 "use strict";
 
-var colorbrewer = require('colorbrewer');//Josh - should path for this be ../../../vendor...?
+var d3 = require('d3');
+var colorbrewer = require('colorbrewer');
 var Config = require('../../controller/Config');
 
 //josh - should these be moved to Config.js?
@@ -204,13 +205,11 @@ Molecule.prototype.setAllLinkCoordinates = function() {
 	}
 };
 
-//todo: some tidying with regards whats in Molecule, whats in Polymer and whats in Gene,Protein, etc
 Molecule.prototype.clearPositionalFeatures = function(posFeats) {
     this.annotations = [];
-    if (this.annotationsSvgGroup) this.controller.emptyElement(this.annotationsSvgGroup);
+    d3.select(this.annotationsSvgGroup).selectAll("*").remove();
 }
 
-//todo: some tidying with regards whats in Molecule, whats in Polymer and whats in Gene,Protein, etc
 Molecule.prototype.setPositionalFeatures = function(posFeats) {
     if (posFeats !== undefined && posFeats !== null) {
         var y = -Molecule.STICKHEIGHT / 2;
@@ -219,7 +218,7 @@ Molecule.prototype.setPositionalFeatures = function(posFeats) {
             return (b.end - b.start) - (a.end - a.start);
         });
         this.annotations = posFeats;
-        for (var i = 0; i < posFeats.length; i++) {
+        /* for (var i = 0; i < posFeats.length; i++) {
             var anno = posFeats[i];
             anno.start = anno.start - 0;
             anno.end = anno.end - 0;
@@ -244,7 +243,7 @@ Molecule.prototype.setPositionalFeatures = function(posFeats) {
              if (this.annotationsSvgGroup) { //hack
 				 this.annotationsSvgGroup.appendChild(anno.pieSlice);
 			 }
-        }
+        } */
     }
 };
 

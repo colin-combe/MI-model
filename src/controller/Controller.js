@@ -47,7 +47,8 @@ xiNET.Controller = function(targetDiv) {
 	if (typeof targetDiv === "string"){
 		targetDiv = document.getElementById(targetDiv);
 	}
-	this.emptyElement(targetDiv); //avoids prob with 'save - web page complete'
+	//avoids problem with 'save - web page complete'
+    d3.select(targetDiv).selectAll("*").remove();
     //create SVG elemnent
     this.svgElement = document.createElementNS(Config.svgns, "svg");
     this.svgElement.setAttribute('id', 'networkSVG');
@@ -139,13 +140,13 @@ xiNET.Controller.prototype.clear = function() {
 		this.force.stop();
 	}
  	this.force = null;
-    this.emptyElement(this.naryLinks);
-    this.emptyElement(this.p_pLinksWide);
-    this.emptyElement(this.highlights);
-    this.emptyElement(this.p_pLinks);
-    this.emptyElement(this.res_resLinks);
-    this.emptyElement(this.proteinUpper);
-	this.emptyElement(this.selfRes_resLinks);
+    d3.select(this.naryLinks).selectAll("*").remove();
+    d3.select(this.p_pLinksWide).selectAll("*").remove();
+    d3.select(this.highlights).selectAll("*").remove();
+    d3.select(this.p_pLinks).selectAll("*").remove();
+    d3.select(this.res_resLinks).selectAll("*").remove();
+    d3.select(this.proteinUpper).selectAll("*").remove();
+	d3.select(this.selfRes_resLinks).selectAll("*").remove();
 
      //are we panning?
     this.panning = false;
@@ -187,12 +188,6 @@ xiNET.Controller.prototype.legendChanged = function(colourScheme) {
 	}
 }
 
-xiNET.Controller.prototype.emptyElement = function(element) {
-    while (element.lastChild) {
-        element.removeChild(element.lastChild);
-    }
-};
-
 // reads our MI JSON format
 xiNET.Controller.prototype.readMIJSON = function(miJson, expand) {
     //check that we've got a parsed javascript object here, not a String
@@ -210,7 +205,7 @@ xiNET.Controller.prototype.readMIJSON = function(miJson, expand) {
 	expand? readStoichExpanded() : readStoichUnexpanded();
 
 	// loop through particpants and features
-	// init binary, unary and sequence links,
+	// init binary, unary and feature links,
 	// and make needed associations between these and containing naryLink
 	for (var l = 0; l < dataElementCount; l++) {
 			var interaction = data[l];
@@ -542,44 +537,6 @@ xiNET.Controller.prototype.readMIJSON = function(miJson, expand) {
 				var interactor = data[n];
 				var participant;
 				var participantId = interactor.id;
-						//~ if (interactor.type.name === 'molecule set') {
-							//~ participant = new MoleculeSet(participantId, self, interactor); //doesn't really work yet
-						//~ }
-						//~ else if (interactor.type.name === 'small molecule') {
-							//~ participant = new BioactiveEntity(participantId, self, interactor, interactor.label);
-						//~ }
-						//~ else if (interactor.type.name === 'protein' || interactor.type.name === 'peptide') {
-							//~ participant = new Protein(participantId, self, interactor, interactor.label);
-							//~ if (typeof interactor.sequence !== 'undefined') {
-								//~ participant.setSequence(interactor.sequence);
-							//~ }
-							//~ else {
-								//~ //should look it up using accession number
-								//~ if (participantId.indexOf('uniprotkb') === 0){
-									//~ needsSequence.add(participantId);
-								//~ } else {
-									//~ participant.setSequence("SEQUENCEMISSING");
-								//~ }
-							//~ }
-						//~ }
-						//~ else if (interactor.type.name === 'peptide') {
-							//~ participant = new Protein(participantId, self, interactor, interactor.label);
-						//~ }
-						//~ else if (interactor.type.name === 'gene') {
-							//~ //its a small mol
-							//~ participant = new Gene(participantId, self, interactor, interactor.label);
-							//~ //participant.initMolecule(interactor.label);// + ' (' + partRef + ')');
-						//~ }else if (interactor.type.name === 'ribonucleic acid') {
-							//~ //its a small mol
-							//~ participant = new RNA(participantId, self, interactor, interactor.label);
-							//~ //participant.initMolecule(interactor.label);// + ' (' + partRef + ')');
-						//~ }else if (interactor.type.name === 'deoxyribonucleic acid') {
-							//~ //its a small mol
-							//~ participant = new DNA(participantId, self, interactor, interactor.label);
-							//~ //participant.initMolecule(interactor.label);// + ' (' + partRef + ')');
-						//~ } else {
-							//~ alert("Unrecognised type:" + interactor.type.name);
-						//~ }
 				participant = newMolecule (interactor, participantId);
 				self.molecules.set(participantId, participant);
 			}
