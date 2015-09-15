@@ -68,6 +68,33 @@ NaryLink.prototype.showHighlight = function(show) {
 
 NaryLink.prototype.check = function() {
     this.show();  
+    
+    if (this.controller.sequenceInitComplete == true) {
+		var interactions = this.getInteractions();
+		var interactionCount = interactions.length;
+		for (var i = 0; i < interactionCount; i++) {//for each interaction
+			var interaction = interactions[i];
+			var jsonParticipants = interaction.participants;
+			var participantCount = jsonParticipants.length
+
+			for (var pi = 0; pi < participantCount; pi++){// for each particpant
+				var jsonParticipant = jsonParticipants[pi];
+				if (jsonParticipant.features){
+					var features = jsonParticipant.features;
+					var fCount = features.length;
+					for (var f = 0; f < fCount; f++){// for each feature
+						var featureId = features[f].id;
+					
+						var feature = this.controller.features.get(featureId);
+					
+						feature.show();
+				
+					}
+				}
+			}
+		}
+	}
+    
     return true;
 };
 
@@ -82,9 +109,8 @@ NaryLink.prototype.hide = function() {};
 NaryLink.prototype.setLinkCoordinates = function() {
     // Uses d3.geom.hull to calculate a bounding path around an array of vertices 
     var calculateHullPath = function(values) {
-		var calced = d3.geom.hull(values);
-		self.hull = calced;//hack?
-		return "M" + calced.join("L") + "Z";
+		self.hull = d3.geom.hull(values);
+		return "M" + self.hull.join("L") + "Z";
     };
 	var self = this;// TODO: - tidy hack above?
 	var mapped = this.orbitNodes(this.getMappedCoordinates());

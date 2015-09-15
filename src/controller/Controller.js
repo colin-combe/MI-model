@@ -24,12 +24,9 @@ var DNA = require('../model/molecule/DNA');
 var RNA = require('../model/molecule/RNA');
 var Complex = require('../model/molecule/Complex');
 var MoleculeSet = require('../model/molecule/MoleculeSet');
-//~ var Link = require('../model/link/Link');
 var NaryLink = require('../model/link/NaryLink');
 var FeatureLink = require('../model/link/FeatureLink');
 var Feature = require('../model/feature/Feature');
-//~ var BinaryLink = require('../model/link/BinaryLink');
-//~ var UnaryLink = require('../model/link/UnaryLink');
 var Expand = require ('./Expand');
 var Listeners = require ('./Listeners');
 var Config = require('./Config');
@@ -52,16 +49,7 @@ xiNET.Controller = function(targetDiv) {
     this.svgElement.setAttribute("style", "display:block;");
     
     //add listeners
-    var self = this;
     new Listeners(this);
-    //~ this.svgElement.onmousedown = function(evt) {self.mouseDown(evt);};
-    //~ this.svgElement.onmousemove = function(evt) {self.mouseMove(evt);};
-    //~ this.svgElement.onmouseup = function(evt) {self.mouseUp(evt);};
-    //~ this.svgElement.onmouseout = function(evt) {self.hideTooltip(evt);};
-    //~ this.lastMouseUp = new Date().getTime();
-    //~ this.svgElement.ontouchstart = function(evt) {self.touchStart(evt);};
-    //~ this.svgElement.ontouchmove = function(evt) {self.touchMove(evt);};
-    //~ this.svgElement.ontouchend = function(evt) {self.touchEnd(evt);};
 
     //legend changed callbacks
     this.legendCallbacks = new Array();
@@ -158,9 +146,8 @@ xiNET.Controller.prototype.clear = function() {
 
  	this.molecules = d3.map();
     this.allNaryLinks = d3.map();
-    //~ this.allBinaryLinks = d3.map();
-    //~ this.allUnaryLinks = d3.map();
     this.allFeatureLinks = d3.map();
+	this.features = d3.map();
 
     this.proteinCount = 0;
     this.maxBlobRadius = 30;
@@ -195,8 +182,7 @@ xiNET.Controller.prototype.readMIJSON = function(miJson, expand) {
 	var data = miJson.data;
     var dataElementCount = data.length;
     var self = this;
-	self.features = d3.map();
-
+	
 	var complexes = d3.map();
 	var needsSequence = d3.set();//things that need seq looked up
 	expand? readStoichExpanded() : readStoichUnexpanded();
@@ -291,51 +277,6 @@ xiNET.Controller.prototype.readMIJSON = function(miJson, expand) {
 	self.checkLinks();
 	self.initLayout();
 
-	//make mi features into annotations
-	//~ var features = self.features.values();
-	//~ var fCount = features.length;
-	//~ for (var f = 0; f < fCount; f++){
-		//~ var feature = features[f];
-		//~ // add features to interactors/participants/nodes
-		//~ var annotName = "";
-		//~ if (typeof feature.name !== 'undefined') {
-			//~ annotName += feature.name + ', ';
-		//~ }
-		//~ if (typeof feature.type !== 'undefined') {
-			//~ annotName += feature.type.name;
-		//~ }
-		//~ if (typeof feature.detmethod !== 'undefined') {
-			//~ annotName += ', ' + feature.detmethod.name;
-		//~ }
-		//~ // var colour = Molecule.domainColours(feature.name);
-		//~ // the id info we need is inside sequenceData att
-		//~ if (feature.sequenceData) {
-		//	console.log(JSON.stringify(feature, null, '\t'));
-			//~ var seqData = feature.sequenceData;
-			//~ var seqDataCount = seqData.length;
-			//~ for (var sdi = 0; sdi < seqDataCount; sdi++) {
-				//~ var seqDatum = seqData[sdi];
-				//~ var mID = seqDatum.interactorRef;
-				//~ if (expand)	{
-					//~ mID = mID	+ "(" + seqDatum.participantRef + ")";
-				//~ }
-				//~ var molecule = self.molecules.get(mID);
-				//~ var sequenceRegex = /(.+)-(.+)/;
-				//~ var match = sequenceRegex.exec(seqDatum.pos);
-				//~ var startRes = match[1] * 1;
-				//~ var endRes = match[2] * 1;
-				//~ if (isNaN(startRes) === false && isNaN(endRes) === false) {
-					//~ var annotation = new Annotation(annotName, startRes, endRes);
-					//~ if (molecule.miFeatures == null) {
-						//~ molecule.miFeatures = new Array();
-					//~ }
-					//~ molecule.miFeatures.push(annotation);
-	//~ //				console.log(molecule.id);
-				//~ }
-			//~ }
-		//~ }
-	//~ }
-
 	//lookup missing sequences
 	var nsIds = needsSequence.values();
 	var nsCount = nsIds.length;
@@ -400,7 +341,8 @@ xiNET.Controller.prototype.readMIJSON = function(miJson, expand) {
 					//doesn't already exist, make new nLink
 					nLink = new NaryLink(nLinkId, self);
 					self.allNaryLinks.set(nLinkId, nLink);
-					//alot of time is being spent on creating these IDs, stash them in the interaction object?
+					//alot of time could be spent creating and recreating these IDs, 
+					//stash them in the interaction object
 					interaction.naryId =  nLinkId;
 
 				}
@@ -421,7 +363,6 @@ xiNET.Controller.prototype.readMIJSON = function(miJson, expand) {
 					}
 
 					participant.naryLinks.set(nLinkId, nLink);
-					//TODO: tidy up whats happening in NaryLink re interactor/participant terminology
 					if (nLink.interactors.indexOf(participant) === -1){
 						nLink.interactors.push(participant);
 					}
@@ -523,7 +464,7 @@ xiNET.Controller.prototype.readMIJSON = function(miJson, expand) {
 					var fCount = features.length;
 					for (var f = 0; f < fCount; f++){
 						var feature = features[f];
-						self.features.set(feature.id, new Feature(feature));
+						self.features.set(feature.id, new Feature(self, feature));
 					}
 				}
 			}
@@ -559,7 +500,7 @@ xiNET.Controller.prototype.readMIJSON = function(miJson, expand) {
 					nLink = new NaryLink(nLinkId, self);
 					self.allNaryLinks.set(nLinkId, nLink);
 				}
-				nLink.addEvidence(interaction);
+				nLink.addInteraction(interaction);
 
 				//~ //init participants
 				for (var pi = 0; pi < participantCount; pi++){
@@ -611,14 +552,6 @@ xiNET.Controller.prototype.readMIJSON = function(miJson, expand) {
 
 		return pIDs.values().sort().join('-');
 	};
-
-	function getNode(seqDatum){
-		var id = seqDatum.interactorRef;
-		if (expand){
-			id = id + '(' + seqDatum.participantRef + ')';
-		}
-		return self.molecules.get(id);
-	}
 
 	function getFeatureLink(fromSeqData, toSeqData, interaction){
 		function seqDataToString(seqData){
@@ -675,47 +608,6 @@ xiNET.Controller.prototype.readMIJSON = function(miJson, expand) {
 		return sequenceLink;
 	};
 
-/*	function getUnaryLink(interactor, interaction){
-		var linkID = '-' + interactor.id + '-' + interactor.id
-		var link = self.allUnaryLinks.get(linkID);
-		if (typeof link === 'undefined') {
-			link = new UnaryLink(linkID, self, interactor);
-			self.allUnaryLinks.set(linkID, link);
-			interactor.selfLink = link;
-		}
-		var nLinkId = getNaryLinkIdFromInteraction(interaction);
-		var nLink = self.allNaryLinks.get(nLinkId);
-		nLink.unaryLinks.set(linkID, link);
-		link.addEvidence(interaction);
-		return link;
-	};
-
-	function getBinaryLink(sourceMolecule, targetMolecule, interaction){
-		var linkID, fi, ti;
-		// these links are undirected and should have same ID regardless of which way round
-		// source and target are
-		if (sourceMolecule.id  < targetMolecule.id) {
-			linkID = '-' + sourceMolecule.id + '-' + targetMolecule.id;
-			fi = sourceMolecule;
-			ti = targetMolecule;
-		} else {
-			linkID = "-" + targetMolecule.id + '-' + sourceMolecule.id;
-			fi = targetMolecule;
-			ti = sourceMolecule;
-		}
-		var link = self.allBinaryLinks.get(linkID);
-		if (typeof link === 'undefined') {
-			link = new BinaryLink(linkID, self, fi, ti);
-			fi.binaryLinks.set(linkID, link);
-			ti.binaryLinks.set(linkID, link);
-			self.allBinaryLinks.set(linkID, link);
-		}
-		var nLinkId = getNaryLinkIdFromInteraction(interaction);
-		var nLink = self.allNaryLinks.get(nLinkId);
-		nLink.binaryLinks.set(linkID, link);
-		link.addEvidence(interaction);
-		return link;
-	}*/
 };
 
 xiNET.Controller.prototype.checkLinks = function() {
@@ -741,8 +633,6 @@ xiNET.Controller.prototype.setAllLinkCoordinates = function() {
 		}
 	}
 	setAll(this.allNaryLinks);
-	//~ setAll(this.allBinaryLinks);
-	//~ setAll(this.allUnaryLinks);
     if (this.sequenceInitComplete) {
 		setAll(this.allFeatureLinks);
 	}
@@ -1027,7 +917,7 @@ xiNET.Controller.prototype.resetZoom = function() {
     }
 };
 
-xiNET.Controller.prototype.exportSVG = function() {
+/*xiNET.Controller.prototype.exportSVG = function() {
 	var svgXml = this.svgElement.parentNode.innerHTML.replace(/<g class="PV_rotator".*?<\/g><\/g>/gi, "");
     //~ .replace(/<rect .*?\/rect>/i, "");//takes out large white background fill
 
@@ -1044,9 +934,7 @@ xiNET.Controller.prototype.exportSVG = function() {
 		xmlAsUrl += encodeURIComponent(xml);
 		var win = window.open(xmlAsUrl, 'xiNET-output.svg');
 	}
-};
-
-
+};*/
 
 xiNET.Controller.prototype.clearSelection = function() {
     var interactors = this.molecules.values();
@@ -1103,6 +991,7 @@ xiNET.Controller.prototype.getTouchEventPoint = function(evt) {
    return p;
 };
 //stop event propogation and defaults; only do what we ask
+// ...this isn't good, remove need to do this
 xiNET.Controller.prototype.preventDefaultsAndStopPropagation = function(evt) {
     if (evt.stopPropagation)
         evt.stopPropagation();

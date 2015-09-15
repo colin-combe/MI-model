@@ -17,17 +17,17 @@
 var Config = require('../../controller/Config');
 
 var Link = function (){};
-Link.maxNoEvidences = 0;
+Link.maxNoInteractions = 0;
 
-Link.prototype.addEvidence = function(interaction) {
-	if (!this.evidences) {
-		this.evidences = d3.map();
+Link.prototype.addInteraction = function(interaction) {
+	if (!this.interactions) {
+		this.interactions = d3.map();
 	}
-	if (this.evidences.has(interaction.id) === false) {
-		this.evidences.set(interaction.id, interaction);
-		if (this.evidences.values().length > Link.maxNoEvidences) {
+	if (this.interactions.has(interaction.id) === false) {
+		this.interactions.set(interaction.id, interaction);
+		if (this.interactions.values().length > Link.maxNoInteractions) {
 			//values().length can be replaced with size() in newer d3 lib
-            Link.maxNoEvidences = this.evidences.values().length; 
+            Link.maxNoInteractions = this.interactions.size(); 
             return true;
         }
 	} else {
@@ -104,9 +104,9 @@ Link.prototype.showData = function() {
 	} 
 };
 
-Link.prototype.filteredEvidence = function() {
+Link.prototype.getInteractions = function(filter) {
     //TODO - filtering
-    return this.evidences.values();
+    return this.interactions.values();
     //~ if (typeof interaction.confidences !== 'undefined') {
         //~ var confidences = interaction.confidences;
         //~ var confCount = confidences.length;

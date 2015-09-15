@@ -19,8 +19,8 @@
  *              "123->256" = uncertain end between 256 and interactor.sequence.length
  */
 
-function SequenceDatum(node, sequenceDatumString) {
-	this.node = node;
+function SequenceDatum(molecule, sequenceDatumString) {
+	this.molecule = molecule;
 	sequenceDatumString = sequenceDatumString.trim();
 
     this.uncertainStart = null;

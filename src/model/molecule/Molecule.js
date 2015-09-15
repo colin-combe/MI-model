@@ -18,7 +18,7 @@ var Config = require('../../controller/Config');
 Molecule.LABELMAXLENGTH = 90; // maximal width reserved for protein-labels
 Molecule.labelY = -5; //label Y offset, better if calc'd half height of label once rendered
 
-function Molecule() {}
+function Molecule() {this.annotations = [];}
 
 Molecule.prototype.addStoichiometryLabel = function(stoich) {
 	if (this.labelSVG) {//complexes don't have labels (yet?)
