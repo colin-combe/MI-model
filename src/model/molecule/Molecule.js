@@ -18,7 +18,7 @@ var Config = require('../../controller/Config');
 Molecule.LABELMAXLENGTH = 90; // maximal width reserved for protein-labels
 Molecule.labelY = -5; //label Y offset, better if calc'd half height of label once rendered
 
-function Molecule() {this.annotations = [];}
+function Molecule() {}
 
 Molecule.prototype.addStoichiometryLabel = function(stoich) {
 	if (this.labelSVG) {//complexes don't have labels (yet?)
@@ -203,48 +203,6 @@ Molecule.prototype.setAllLinkCoordinates = function() {
 	for (var l = 0; l < c; l++) {
 		links[l].setLinkCoordinates();
 	}
-};
-
-Molecule.prototype.clearPositionalFeatures = function(posFeats) {
-    this.annotations = [];
-    d3.select(this.annotationsSvgGroup).selectAll("*").remove();
-}
-
-Molecule.prototype.setPositionalFeatures = function(posFeats) {
-    if (posFeats !== undefined && posFeats !== null) {
-        var y = -Molecule.STICKHEIGHT / 2;
-        //draw longest regions first
-        posFeats.sort(function(a, b) {
-            return (b.end - b.start) - (a.end - a.start);
-        });
-        this.annotations = posFeats;
-        /* for (var i = 0; i < posFeats.length; i++) {
-            var anno = posFeats[i];
-            anno.start = anno.start - 0;
-            anno.end = anno.end - 0;
-            anno.pieSlice = document.createElementNS(Config.svgns, "path");
-            if (this.form === 0) {
-                anno.pieSlice.setAttribute("d", this.getAnnotationPieSliceArcPath(anno));
-            } else {
-                anno.pieSlice.setAttribute("d", this.getAnnotationRectPath(anno));
-            }
-            anno.pieSlice.setAttribute("stroke-width", 1);
-            anno.pieSlice.setAttribute("fill-opacity", "0.6");
-            var text = anno.name + " [" + anno.start + " - " + anno.end + "]";
-            anno.pieSlice.name = text;
-            var xlv = this.controller;
-            var self = this;
-            anno.pieSlice.onmouseover = function(evt) {
-				var el = (evt.target.correspondingUseElement) ? evt.target.correspondingUseElement : evt.target;
-                xlv.preventDefaultsAndStopPropagation(evt);
-                xlv.setTooltip(el.name, el.getAttribute('fill'));
-                self.showHighlight(true);
-            };
-             if (this.annotationsSvgGroup) { //hack
-				 this.annotationsSvgGroup.appendChild(anno.pieSlice);
-			 }
-        } */
-    }
 };
 
 //TODO: remove this, use rotateAboutPoint instead

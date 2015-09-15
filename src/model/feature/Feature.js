@@ -38,6 +38,7 @@ function Feature(controller, json) {
 				mID = mID	+ "(" + seqDatum.participantRef + ")";
 			}
 			var molecule = this.controller.molecules.get(mID);
+			console.log(">-"+molecule.id + "\t" + seqDatum.pos);
 			var seqData = new SequenceDatum(molecule, seqDatum.pos);
 			this.sequenceData.push(seqData);
 		}
@@ -74,7 +75,8 @@ Feature.prototype.show = function(){
 			if (molecule.annotationsSvgGroup) { //hack
 				 molecule.annotationsSvgGroup.appendChild(anno.pieSlice);
 			}
-			molecule.annotations.push(anno);
+			molecule.features.push(anno);
+			console.log(">>"+molecule.id + "\t" + seqData);
 		}
     } 
 }

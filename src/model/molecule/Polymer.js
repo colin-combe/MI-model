@@ -128,10 +128,10 @@ Polymer.prototype.scale = function() {
 		
 		this.labelSVG.transform.baseVal.initialize(this.controller.svgElement.createSVGTransformFromMatrix(k));
 	    
-		if (this.annotations){
-			var ca = this.annotations.length;
+		if (this.features){
+			var ca = this.features.length;
 			for (var a = 0; a < ca; a++){
-				var anno = this.annotations[a];
+				var anno = this.features[a];
 				anno.pieSlice.setAttribute("d", this.getAnnotationRectPath(anno));
 			}
 		}
@@ -266,7 +266,7 @@ Polymer.prototype.setForm = function(form, svgP) {
 				.attr("width", r * 2).attr("height", r * 2)
 				.attr("rx", r).attr("ry", r)
 				.duration(Polymer.transitionTime);
-			d3.select(this.annotationsSvgGroup).transition()
+			d3.select(this.featuresSvgGroup).transition()
 				.attr("transform", "scale(1, 1)")
 				.duration(Polymer.transitionTime);
 			d3.select(this.highlight).transition()
@@ -328,8 +328,8 @@ Polymer.prototype.toCircle = function(svgP) {
 	}*/
 
 	var self = this;
-	if (this.annotations) {
-		var annots = this.annotations;
+	if (this.features) {
+		var annots = this.features;
 		var ca = annots.length;
 		for (var a = 0; a < ca; a++) {
 			var anno = annots[a];
@@ -338,7 +338,7 @@ Polymer.prototype.toCircle = function(svgP) {
 				.duration(Polymer.transitionTime).each("end", 
 					function () {
 						for (var b = 0; b < ca; b++) {
-							var annoB = self.annotations[b];
+							var annoB = self.features[b];
 							if (this === annoB.pieSlice){
 								d3.select(this).attr("d", self.getAnnotationPieSliceArcPath(annoB));
 							}
@@ -454,9 +454,9 @@ Polymer.prototype.toStick = function() {
 			}
 		}
 	}*/		
-	if (this.annotations) {
+	if (this.features) {
 		var bottom = Polymer.STICKHEIGHT / 2, top = -Polymer.STICKHEIGHT / 2;
-		var annots = this.annotations;
+		var annots = this.features;
 		var ca = annots.length;
 		for (var a = 0; a < ca; a++) {
 			var anno = annots[a];
@@ -484,7 +484,7 @@ Polymer.prototype.toStick = function() {
 		var currentLength = lengthInterpol(cubicInOut(interp));
 		d3.select(self.highlight).attr("width", currentLength).attr("x", - (currentLength / 2) + (0.5 * Polymer.UNITS_PER_RESIDUE * self.stickZoom));
 		d3.select(self.outline).attr("width", currentLength).attr("x", - (currentLength / 2) + (0.5 * Polymer.UNITS_PER_RESIDUE * self.stickZoom));
-		d3.select(self.annotationsSvgGroup).attr("transform", "scale(" + (self.stickZoom) + ", 1)");
+		d3.select(self.featuresSvgGroup).attr("transform", "scale(" + (self.stickZoom) + ", 1)");
 		d3.select(self.background).attr("width", currentLength).attr("x", - (currentLength / 2) + (0.5 * Polymer.UNITS_PER_RESIDUE * self.stickZoom));
 		self.stickZoom = stickZoomInterpol(cubicInOut(interp))
 		self.setAllLinkCoordinates();
@@ -538,6 +538,50 @@ Polymer.prototype.getResidueCoordinates = function(r, yOff) {
     y = y + this.y;
     return [x, y];
 };
+
+/*
+Polymer.prototype.clearFeatures = function() {
+    this.features = [];
+    d3.select(this.featuresSvgGroup).selectAll("*").remove();
+}
+
+Polymer.prototype.addFeature = function(feature) {
+    if (posFeats !== undefined && posFeats !== null) {
+        var y = -Molecule.STICKHEIGHT / 2;
+        //draw longest regions first
+        posFeats.sort(function(a, b) {
+            return (b.end - b.start) - (a.end - a.start);
+        });
+        this.features = posFeats;
+         for (var i = 0; i < posFeats.length; i++) {
+            var anno = posFeats[i];
+            anno.start = anno.start - 0;
+            anno.end = anno.end - 0;
+            anno.pieSlice = document.createElementNS(Config.svgns, "path");
+            if (this.form === 0) {
+                anno.pieSlice.setAttribute("d", this.getAnnotationPieSliceArcPath(anno));
+            } else {
+                anno.pieSlice.setAttribute("d", this.getAnnotationRectPath(anno));
+            }
+            anno.pieSlice.setAttribute("stroke-width", 1);
+            anno.pieSlice.setAttribute("fill-opacity", "0.6");
+            var text = anno.name + " [" + anno.start + " - " + anno.end + "]";
+            anno.pieSlice.name = text;
+            var xlv = this.controller;
+            var self = this;
+            anno.pieSlice.onmouseover = function(evt) {
+				var el = (evt.target.correspondingUseElement) ? evt.target.correspondingUseElement : evt.target;
+                xlv.preventDefaultsAndStopPropagation(evt);
+                xlv.setTooltip(el.name, el.getAttribute('fill'));
+                self.showHighlight(true);
+            };
+             if (this.featuresSvgGroup) { //hack
+				 this.featuresSvgGroup.appendChild(anno.pieSlice);
+			 }
+        } 
+    }
+};
+*/
 
 Polymer.stepsInArc = 5;
 

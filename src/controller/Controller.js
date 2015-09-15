@@ -675,29 +675,31 @@ xiNET.Controller.prototype.autoLayout = function() {
 		nodeObj.py = mol.y;
 		layoutObj.nodes.push(nodeObj);
 	}
-	//~ var links = this.allBinaryLinks.values();
-	//~ var linkCount = links.length;
-	//~ for (var l = 0; l < linkCount; l++) {
-		//~ var link = links[l];
-			//~ var fromMol = link.interactors[0];
-			//~ var toMol = link.interactors[1];
-			//~ var source = molLookUp[fromMol.id];
-			//~ var target = molLookUp[toMol.id];
-//~ 
-			//~ if (source !== target) {
-//~ 
-				//~ if (typeof source !== 'undefined' && typeof target !== 'undefined') {
-					//~ var linkObj = {};
-					//~ linkObj.source = source;
-					//~ linkObj.target = target;
-					//~ linkObj.id = link.id;
-					//~ layoutObj.links.push(linkObj);
-				//~ }
-				//~ else {
-					//~ alert("NOT RIGHT");
-				//~ }
-			//~ }
-	//~ }
+	var links = this.allNaryLinks.values();
+	var linkCount = links.length;
+	for (var l = 0; l < linkCount; l++) {
+		var link = links[l];
+		if (link.interactors.length === 2){
+			var fromMol = link.interactors[0];
+			var toMol = link.interactors[1];
+			var source = molLookUp[fromMol.id];
+			var target = molLookUp[toMol.id];
+
+			if (source !== target) {
+
+				if (typeof source !== 'undefined' && typeof target !== 'undefined') {
+					var linkObj = {};
+					linkObj.source = source;
+					linkObj.target = target;
+					linkObj.id = link.id;
+					layoutObj.links.push(linkObj);
+				}
+				else {
+					alert("NOT RIGHT");
+				}
+			}
+		}
+	}
 
 	var k = Math.sqrt(layoutObj.nodes.length / (width * height));
 	// mike suggests:
@@ -884,12 +886,12 @@ xiNET.Controller.prototype.initPolymers = function() {//currently only does Prot
 	}
 	this.sequenceInitComplete = true;
 
-	if (this.annotationChoice){
-		xlv.setAnnotations(this.annotationChoice);
-	}
-	else {
-		this.setAnnotations('MI FEATURES');
-	}
+	//~ if (this.annotationChoice){
+		//~ xlv.setAnnotations(this.annotationChoice);
+	//~ }
+	//~ else {
+		//~ this.setAnnotations('MI FEATURES');
+	//~ }
 }
 
 xiNET.Controller.prototype.reset = function() {

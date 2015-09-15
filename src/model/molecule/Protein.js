@@ -28,6 +28,7 @@ function Protein(id, xinetController, json, name) {
     this.binaryLinks = d3.map();
     this.selfLink = null;
     this.sequenceLinks = d3.map();
+    this.features = [];
     this.selfLink = null;
     // layout info
     this.x = 40;
