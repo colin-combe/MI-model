@@ -27,7 +27,7 @@ Molecule.prototype.addStoichiometryLabel = function(stoich) {
 }
 
 Molecule.prototype.mouseDown = function(evt, labelClickStart) {
-        this.controller.preventDefaultsAndStopPropagation(evt);//see MouseEvents.js
+        this.controller.preventDefaultsAndStopPropagation(evt);
         
         this.controller.labelClickStart = labelClickStart;
         

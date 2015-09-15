@@ -31,16 +31,11 @@ var Feature = require('../model/feature/Feature');
 //~ var BinaryLink = require('../model/link/BinaryLink');
 //~ var UnaryLink = require('../model/link/UnaryLink');
 var Expand = require ('./Expand');
+var Listeners = require ('./Listeners');
 var Config = require('./Config');
+var MouseEventCodes = require('./MouseEventCodes');
 //for save file.
-var FileSaver = require('file-saver.js');
-
-var MouseEventCodes = {}
-MouseEventCodes.MOUSE_UP = 0;//start state, also set when mouse up on svgElement
-MouseEventCodes.PANNING = 1;//set by mouse down on svgElement - left button, no shift or controller
-MouseEventCodes.DRAGGING = 2;//set by mouse down on Protein or Link
-MouseEventCodes.ROTATING = 3;//set by mouse down on Rotator, drag?
-MouseEventCodes.SELECTING = 4;//set by mouse down on svgElement- right button or left button shift or controller, drag
+//~ var FileSaver = require('file-saver.js');
 
 xiNET.Controller = function(targetDiv) {
 	// targetDiv could be div itself or id of div - lets deal with that
@@ -58,6 +53,7 @@ xiNET.Controller = function(targetDiv) {
     
     //add listeners
     var self = this;
+    new Listeners(this);
     //~ this.svgElement.onmousedown = function(evt) {self.mouseDown(evt);};
     //~ this.svgElement.onmousemove = function(evt) {self.mouseMove(evt);};
     //~ this.svgElement.onmouseup = function(evt) {self.mouseUp(evt);};
@@ -162,8 +158,8 @@ xiNET.Controller.prototype.clear = function() {
 
  	this.molecules = d3.map();
     this.allNaryLinks = d3.map();
-    this.allBinaryLinks = d3.map();
-    this.allUnaryLinks = d3.map();
+    //~ this.allBinaryLinks = d3.map();
+    //~ this.allUnaryLinks = d3.map();
     this.allFeatureLinks = d3.map();
 
     this.proteinCount = 0;
@@ -679,7 +675,7 @@ xiNET.Controller.prototype.readMIJSON = function(miJson, expand) {
 		return sequenceLink;
 	};
 
-	function getUnaryLink(interactor, interaction){
+/*	function getUnaryLink(interactor, interaction){
 		var linkID = '-' + interactor.id + '-' + interactor.id
 		var link = self.allUnaryLinks.get(linkID);
 		if (typeof link === 'undefined') {
@@ -719,7 +715,7 @@ xiNET.Controller.prototype.readMIJSON = function(miJson, expand) {
 		nLink.binaryLinks.set(linkID, link);
 		link.addEvidence(interaction);
 		return link;
-	}
+	}*/
 };
 
 xiNET.Controller.prototype.checkLinks = function() {
@@ -731,8 +727,8 @@ xiNET.Controller.prototype.checkLinks = function() {
 		}
 	}
 	checkAll(this.allNaryLinks);
-	checkAll(this.allBinaryLinks);
-	checkAll(this.allUnaryLinks);
+	//~ checkAll(this.allBinaryLinks);
+	//~ checkAll(this.allUnaryLinks);
 	checkAll(this.allFeatureLinks);
 };
 
@@ -745,8 +741,8 @@ xiNET.Controller.prototype.setAllLinkCoordinates = function() {
 		}
 	}
 	setAll(this.allNaryLinks);
-	setAll(this.allBinaryLinks);
-	setAll(this.allUnaryLinks);
+	//~ setAll(this.allBinaryLinks);
+	//~ setAll(this.allUnaryLinks);
     if (this.sequenceInitComplete) {
 		setAll(this.allFeatureLinks);
 	}
@@ -789,29 +785,29 @@ xiNET.Controller.prototype.autoLayout = function() {
 		nodeObj.py = mol.y;
 		layoutObj.nodes.push(nodeObj);
 	}
-	var links = this.allBinaryLinks.values();
-	var linkCount = links.length;
-	for (var l = 0; l < linkCount; l++) {
-		var link = links[l];
-			var fromMol = link.interactors[0];
-			var toMol = link.interactors[1];
-			var source = molLookUp[fromMol.id];
-			var target = molLookUp[toMol.id];
-
-			if (source !== target) {
-
-				if (typeof source !== 'undefined' && typeof target !== 'undefined') {
-					var linkObj = {};
-					linkObj.source = source;
-					linkObj.target = target;
-					linkObj.id = link.id;
-					layoutObj.links.push(linkObj);
-				}
-				else {
-					alert("NOT RIGHT");
-				}
-			}
-	}
+	//~ var links = this.allBinaryLinks.values();
+	//~ var linkCount = links.length;
+	//~ for (var l = 0; l < linkCount; l++) {
+		//~ var link = links[l];
+			//~ var fromMol = link.interactors[0];
+			//~ var toMol = link.interactors[1];
+			//~ var source = molLookUp[fromMol.id];
+			//~ var target = molLookUp[toMol.id];
+//~ 
+			//~ if (source !== target) {
+//~ 
+				//~ if (typeof source !== 'undefined' && typeof target !== 'undefined') {
+					//~ var linkObj = {};
+					//~ linkObj.source = source;
+					//~ linkObj.target = target;
+					//~ linkObj.id = link.id;
+					//~ layoutObj.links.push(linkObj);
+				//~ }
+				//~ else {
+					//~ alert("NOT RIGHT");
+				//~ }
+			//~ }
+	//~ }
 
 	var k = Math.sqrt(layoutObj.nodes.length / (width * height));
 	// mike suggests:
@@ -1050,199 +1046,7 @@ xiNET.Controller.prototype.exportSVG = function() {
 	}
 };
 
-//listeners also attached to mouse evnts by Molecule (and Rotator) and Link, those consume their events
-//mouse down on svgElement must be allowed to propogate (to fire event on Prots/Links)
 
-/**
- * Handle mousedown event.
- */
-xiNET.Controller.prototype.mouseDown = function(evt) {
-    //prevent default, but allow propogation
-    evt.preventDefault();
-    //evt.returnValue = false;
-    //stop force layout
-    if (typeof this.force !== 'undefined' && this.force != null) {
-        this.force.stop();
-    }
-
-    var p = this.getEventPoint(evt);// seems to be correct, see below
-   this.dragStart = this.mouseToSVG(p.x, p.y);
-
-    var rightClick; //which button has just been raised
-    if (evt.which)
-        rightClick = (evt.which === 3);
-    else if (evt.button)
-        rightClick = (evt.button === 2);
-
-    if (evt.ctrlKey === true || evt.shiftKey === true || rightClick) {
-    } else {
-    this.state = MouseEventCodes.PANNING;
-    this.panned = false;
-    }
-    return false;
-};
-
-// dragging/rotation/panning/selecting
-xiNET.Controller.prototype.mouseMove = function(evt) {
-    var p = this.getEventPoint(evt);// seems to be correct, see below
-	var c = this.mouseToSVG(p.x, p.y);
-
-	if (this.dragElement != null) { //dragging or rotating
-		this.hideTooltip();
-		var dx = this.dragStart.x - c.x;
-		var dy = this.dragStart.y - c.y;
-
-		if (this.state === MouseEventCodes.DRAGGING) {
-			// we are currently dragging things around
-			var ox, oy, nx, ny;
-			if (typeof this.dragElement.x === 'undefined') { // if not an Molecule
-				var nodes = this.dragElement.interactors;
-				var nodeCount = nodes.length;
-				for (var i = 0; i < nodeCount; i++) {
-					var protein = nodes[i];
-					ox = protein.x;
-					oy = protein.y;
-					nx = ox - dx;
-					ny = oy - dy;
-					protein.setPosition(nx, ny);
-					protein.setAllLinkCoordinates();
-				}
-				for (i = 0; i < nodeCount; i++) {
-					nodes[i].setAllLinkCoordinates();
-				}
-			} else {
-				//its a protein - drag it TODO: DRAG SELECTED
-				ox = this.dragElement.x;
-				oy = this.dragElement.y;
-				nx = ox - dx;
-				ny = oy - dy;
-				this.dragElement.setPosition(nx, ny);
-				this.dragElement.setAllLinkCoordinates();
-			}
-			this.dragStart = c;
-		}
-
-		else if (this.state === MouseEventCodes.ROTATING) {
-			// Distance from mouse x and center of stick.
-			var _dx = c.x - this.dragElement.x
-			// Distance from mouse y and center of stick.
-			var _dy = c.y - this.dragElement.y;
-			//see http://en.wikipedia.org/wiki/Atan2#Motivation
-			var centreToMouseAngleRads = Math.atan2(_dy, _dx);
-			if (this.whichRotator === 0) {
-				centreToMouseAngleRads = centreToMouseAngleRads + Math.PI;
-			}
-			var centreToMouseAngleDegrees = centreToMouseAngleRads * (360 / (2 * Math.PI));
-			this.dragElement.setRotation(centreToMouseAngleDegrees);
-			this.dragElement.setAllLinkCoordinates();
-		}
-		else { //not dragging or rotating yet, maybe we should start
-			// don't start dragging just on a click - we need to move the mouse a bit first
-			if (Math.sqrt(dx * dx + dy * dy) > (5 * this.z)) {
-				this.state = MouseEventCodes.DRAGGING;
-
-			}
-		}
-	}
-
-//    else if (this.state === MouseEventCodes.SELECTING) {
-//        this.updateMarquee(this.marquee, c);
-//    }
-	else if (this.state === MouseEventCodes.PANNING) {
-//		setCTM(this.container, this.container.getCTM().translate(c.x - this.dragStart.x, c.y - this.dragStart.y));
-	}
-	else {
-		this.showTooltip(p);
-	}
-    return false;
-};
-
-
-// this ends all dragging and rotating
-xiNET.Controller.prototype.mouseUp = function(evt) {
-    var time = new Date().getTime();
-    //console.log("Mouse up: " + evt.srcElement + " " + (time - this.lastMouseUp));
-    this.preventDefaultsAndStopPropagation(evt);
-    //eliminate some spurious mouse up events
-    if ((time - this.lastMouseUp) > 150){
-
-        var rightclick, middleclick; //which button has just been raised
-        if (evt.which)
-            rightclick = (evt.which === 3);
-        else if (evt.button)
-            rightclick = (evt.button === 2);
-        if (evt.which)
-            middleclick = (evt.which === 2);
-        else if (evt.button)
-            middleclick = (evt.button === 1);
-
-        var p = this.getEventPoint(evt);// seems to be correct, see below
-        var c = this.mouseToSVG(p.x, p.y);
-
-        if (this.dragElement != null) {
-            if (!(this.state === MouseEventCodes.DRAGGING || this.state === MouseEventCodes.ROTATING)) { //not dragging or rotating
-                if (rightclick) {
-					// RIGHT click
-                }
-                else if (middleclick) {
-                    //can't be used? problem with IE (scroll thingy)
-                }
-                else { //left click; show matches for link, toggle form for protein, switch stick scale
-                    if (typeof this.dragElement.x === 'undefined') { //if not protein
-                        //~ this.dragElement.showData();
-                    } else if (evt.shiftKey) { //if shift key
-                        this.dragElement.switchStickScale(c);
-                    } else {
-						if (this.sequenceInitComplete === true){
-							if (!this.labelClickStart) {
-								if (this.dragElement.form === 0) {
-									this.dragElement.setForm(1, c);
-								} else {
-									this.dragElement.setForm(0, c);
-								}
-							}
-							else {
-								this.dragElement.showData();
-							}
-						}
-                    }
-                }
-                //~ this.checkLinks();
-            }
-            else if (this.state === MouseEventCodes.ROTATING) {
-                //round protein rotation to nearest 5 degrees (looks neater)
-                this.dragElement.setRotation(Math.round(this.dragElement.rotation / 5) * 5);
-            }
-            else {
-            } //end of protein drag; do nothing
-        }
-        else if (rightclick) { //right click on background; show all hidden links
-            //~ var links = this.proteinLinks.values();
-            //~ var linkCount = links.length;
-            //~ for (var l = 0; l < linkCount; l++) {
-                //~ var link = links[l];
-                //~ link.hidden = false;
-            //~ }
-            this.checkLinks();
-        } else if (/*this.state !== MouseEventCodes.PANNING &&*/ evt.controllerKey === false) {
-            this.clearSelection();
-        }
-
-        if (this.state === MouseEventCodes.SELECTING) {
-            clearInterval(this.marcher);
-            this.svgElement.removeChild(this.marquee);
-        }
-	}
-
-	this.dragElement = null;
-	this.whichRotator = -1;
-	this.state = MouseEventCodes.MOUSE_UP;
-       
-    this.labelClickStart = false;
-     
-    this.lastMouseUp = time;
-    return false;
-};
 
 xiNET.Controller.prototype.clearSelection = function() {
     var interactors = this.molecules.values();

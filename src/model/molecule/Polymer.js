@@ -172,7 +172,8 @@ Polymer.prototype.scale = function() {
 };
 
 Polymer.prototype.setScaleGroup = function() {
-	this.controller.emptyElement(this.ticks);
+	d3.select(this.ticks).selectAll("*").remove();
+	
 	this.upperGroup.appendChild(this.ticks);//will do nothing if this.ticks already appended to this.uppergroup
     
     this.scaleLabels = new Array();

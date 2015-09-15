@@ -12,58 +12,241 @@
 
 var xiNET = {}; //crosslinkviewer's javascript namespace
 var d3 = require('d3');
-var colorbrewer = require('colorbrewer');
-var xiNET_Storage = require('./xiNET_Storage');
-var Annotation = require('../model/molecule/Annotation');
-var Molecule = require('../model/molecule/Molecule');
-var Polymer = require('../model/molecule/Polymer');
-var Protein = require('../model/molecule/Protein');
-var BioactiveEntity = require('../model/molecule/BioactiveEntity');
-var Gene = require('../model/molecule/Gene');
-var DNA = require('../model/molecule/DNA');
-var RNA = require('../model/molecule/RNA');
-var Complex = require('../model/molecule/Complex');
-var MoleculeSet = require('../model/molecule/MoleculeSet');
-var Link = require('../model/link/Link');
-var NaryLink = require('../model/link/NaryLink');
-var FeatureLink = require('../model/link/FeatureLink');
-var Feature = require('../model/feature/Feature');
-var BinaryLink = require('../model/link/BinaryLink');
-var UnaryLink = require('../model/link/UnaryLink');
-var Expand = require ('./Expand');
+//~ var colorbrewer = require('colorbrewer');
+//~ var xiNET_Storage = require('./xiNET_Storage');
+//~ var Annotation = require('../model/molecule/Annotation');
+//~ var Molecule = require('../model/molecule/Molecule');
+//~ var Polymer = require('../model/molecule/Polymer');
+//~ var Protein = require('../model/molecule/Protein');
+//~ var BioactiveEntity = require('../model/molecule/BioactiveEntity');
+//~ var Gene = require('../model/molecule/Gene');
+//~ var DNA = require('../model/molecule/DNA');
+//~ var RNA = require('../model/molecule/RNA');
+//~ var Complex = require('../model/molecule/Complex');
+//~ var MoleculeSet = require('../model/molecule/MoleculeSet');
+//~ var Link = require('../model/link/Link');
+//~ var NaryLink = require('../model/link/NaryLink');
+//~ var FeatureLink = require('../model/link/FeatureLink');
+//~ var Feature = require('../model/feature/Feature');
+//~ var BinaryLink = require('../model/link/BinaryLink');
+//~ var UnaryLink = require('../model/link/UnaryLink');
+//~ var Expand = require ('./Expand');
 var Config = require('./Config');
+var MouseEventCodes = require('./MouseEventCodes');
 //for save file.
 var FileSaver = require('file-saver.js');
 
-var MouseEventCodes = {}
-MouseEventCodes.MOUSE_UP = 0;//start state, also set when mouse up on svgElement
-MouseEventCodes.PANNING = 1;//set by mouse down on svgElement - left button, no shift or controller
-MouseEventCodes.DRAGGING = 2;//set by mouse down on Protein or Link
-MouseEventCodes.ROTATING = 3;//set by mouse down on Rotator, drag?
-MouseEventCodes.SELECTING = 4;//set by mouse down on svgElement- right button or left button shift or controller, drag
-
 xiNET.Listeners = function(controller) {
 	this.controller = controller;
-    
     //add listeners
     var self = this;
     this.controller.svgElement.onmousedown = function(evt) {self.mouseDown(evt);};
     this.controller.svgElement.onmousemove = function(evt) {self.mouseMove(evt);};
     this.controller.svgElement.onmouseup = function(evt) {self.mouseUp(evt);};
-    this.controller.svgElement.onmouseout = function(evt) {self.hideTooltip(evt);};
+    this.controller.svgElement.onmouseout = function(evt) {self.controller.hideTooltip(evt);};
     this.controller.lastMouseUp = new Date().getTime();
     this.controller.svgElement.ontouchstart = function(evt) {self.touchStart(evt);};
     this.controller.svgElement.ontouchmove = function(evt) {self.touchMove(evt);};
     this.controller.svgElement.ontouchend = function(evt) {self.touchEnd(evt);};
+};
+//listeners also attached to mouse evnts by Molecule (and Rotator) and Link, those consume their events
+//mouse down on svgElement must be allowed to propogate (to fire event on Prots/Links)
 
- 
+/**
+ * Handle mousedown event.
+ */
+xiNET.Listeners.prototype.mouseDown = function(evt) {
+    //prevent default, but allow propogation
+    evt.preventDefault();
+    //evt.returnValue = false;
+    //stop force layout
+    if (typeof this.controller.force !== 'undefined' && this.controller.force != null) {
+        this.controller.force.stop();
+    }
+
+    var p = this.controller.getEventPoint(evt);// seems to be correct, see below
+   this.controller.dragStart = this.controller.mouseToSVG(p.x, p.y);
+
+    var rightClick; //which button has just been raised
+    if (evt.which)
+        rightClick = (evt.which === 3);
+    else if (evt.button)
+        rightClick = (evt.button === 2);
+
+    if (evt.ctrlKey === true || evt.shiftKey === true || rightClick) {
+    } else {
+    this.controller.state = MouseEventCodes.PANNING;
+    this.panned = false;
+    }
+    return false;
 };
 
+// dragging/rotation/panning/selecting
+xiNET.Listeners.prototype.mouseMove = function(evt) {
+	var p = this.controller.getEventPoint(evt);// seems to be correct, see below
+	var c = this.controller.mouseToSVG(p.x, p.y);
+
+	if (this.controller.dragElement != null) { //dragging or rotating
+		this.controller.hideTooltip();
+		var dx = this.controller.dragStart.x - c.x;
+		var dy = this.controller.dragStart.y - c.y;
+
+		if (this.controller.state === MouseEventCodes.DRAGGING) {
+			// we are currently dragging things around
+			var ox, oy, nx, ny;
+			if (typeof this.controller.dragElement.x === 'undefined') { // if link
+				var nodes = this.controller.dragElement.interactors;
+				var nodeCount = nodes.length;
+				for (var i = 0; i < nodeCount; i++) {
+					var protein = nodes[i];
+					ox = protein.x;
+					oy = protein.y;
+					nx = ox - dx;
+					ny = oy - dy;
+					protein.setPosition(nx, ny);
+					protein.setAllLinkCoordinates();
+				}
+				for (i = 0; i < nodeCount; i++) {
+					nodes[i].setAllLinkCoordinates();
+				}
+			} else {
+				//its a protein - drag it TODO: DRAG SELECTED
+				ox = this.controller.dragElement.x;
+				oy = this.controller.dragElement.y;
+				nx = ox - dx;
+				ny = oy - dy;
+				this.controller.dragElement.setPosition(nx, ny);
+				this.controller.dragElement.setAllLinkCoordinates();
+			}
+			this.controller.dragStart = c;
+		}
+
+		else if (this.controller.state === MouseEventCodes.ROTATING) {
+			// Distance from mouse x and center of stick.
+			var _dx = c.x - this.controller.dragElement.x
+			// Distance from mouse y and center of stick.
+			var _dy = c.y - this.controller.dragElement.y;
+			//see http://en.wikipedia.org/wiki/Atan2#Motivation
+			var centreToMouseAngleRads = Math.atan2(_dy, _dx);
+			if (this.whichRotator === 0) {
+				centreToMouseAngleRads = centreToMouseAngleRads + Math.PI;
+			}
+			var centreToMouseAngleDegrees = centreToMouseAngleRads * (360 / (2 * Math.PI));
+			this.controller.dragElement.setRotation(centreToMouseAngleDegrees);
+			this.controller.dragElement.setAllLinkCoordinates();
+		}
+		else { //not dragging or rotating yet, maybe we should start
+			// don't start dragging just on a click - we need to move the mouse a bit first
+			if (Math.sqrt(dx * dx + dy * dy) > (5 * this.controller.z)) {
+				this.controller.state = MouseEventCodes.DRAGGING;
+
+			}
+		}
+	}
+
+//    else if (this.controller.state === MouseEventCodes.SELECTING) {
+//        this.updateMarquee(this.marquee, c);
+//    }
+	else if (this.controller.state === MouseEventCodes.PANNING) {
+//		setCTM(this.container, this.container.getCTM().translate(c.x - this.controller.dragStart.x, c.y - this.controller.dragStart.y));
+	}
+	else {
+		this.controller.showTooltip(p);
+	}
+    return false;
+};
+
+
+// this ends all dragging and rotating
+xiNET.Listeners.prototype.mouseUp = function(evt) {
+    var time = new Date().getTime();
+    //console.log("Mouse up: " + evt.srcElement + " " + (time - this.lastMouseUp));
+    this.controller.preventDefaultsAndStopPropagation(evt);
+    //eliminate some spurious mouse up events
+    if ((time - this.lastMouseUp) > 150){
+
+        var rightclick, middleclick; //which button has just been raised
+        if (evt.which)
+            rightclick = (evt.which === 3);
+        else if (evt.button)
+            rightclick = (evt.button === 2);
+        if (evt.which)
+            middleclick = (evt.which === 2);
+        else if (evt.button)
+            middleclick = (evt.button === 1);
+
+        var p = this.controller.getEventPoint(evt);// seems to be correct, see below
+        var c = this.controller.mouseToSVG(p.x, p.y);
+
+        if (this.controller.dragElement != null) {
+            if (!(this.controller.state === MouseEventCodes.DRAGGING || this.controller.state === MouseEventCodes.ROTATING)) { //not dragging or rotating
+                if (rightclick) {
+					// RIGHT click
+                }
+                else if (middleclick) {
+                    //can't be used? problem with IE (scroll thingy)
+                }
+                else { //left click; show matches for link, toggle form for protein, switch stick scale
+                    if (typeof this.controller.dragElement.x === 'undefined') { //if not protein
+                        //~ this.controller.dragElement.showData();
+                    } else if (evt.shiftKey) { //if shift key
+                        this.controller.dragElement.switchStickScale(c);
+                    } else {
+						if (this.controller.sequenceInitComplete === true){
+							//~ if (!this.labelClickStart) {
+								if (this.controller.dragElement.form === 0) {
+									this.controller.dragElement.setForm(1, c);
+								} else {
+									this.controller.dragElement.setForm(0, c);
+								}
+							//~ }
+							//~ else {
+								//~ this.controller.dragElement.showData();
+							//~ }
+						}
+                    }
+                }
+                //~ this.checkLinks();
+            }
+            else if (this.controller.state === MouseEventCodes.ROTATING) {
+                //round protein rotation to nearest 5 degrees (looks neater)
+                this.controller.dragElement.setRotation(Math.round(this.controller.dragElement.rotation / 5) * 5);
+            }
+            else {
+            } //end of protein drag; do nothing
+        }
+        else if (rightclick) { //right click on background; show all hidden links
+            //~ var links = this.proteinLinks.values();
+            //~ var linkCount = links.length;
+            //~ for (var l = 0; l < linkCount; l++) {
+                //~ var link = links[l];
+                //~ link.hidden = false;
+            //~ }
+            this.controller.checkLinks();
+        } else if (/*this.controller.state !== MouseEventCodes.PANNING &&*/ evt.controllerKey === false) {
+            this.controller.clearSelection();
+        }
+
+        if (this.controller.state === MouseEventCodes.SELECTING) {
+            clearInterval(this.marcher);
+            this.svgElement.removeChild(this.marquee);
+        }
+	}
+
+	this.controller.dragElement = null;
+	this.whichRotator = -1;
+	this.controller.state = MouseEventCodes.MOUSE_UP;
+       
+    this.labelClickStart = false;
+     
+    this.lastMouseUp = time;
+    return false;
+};
 
 /**
  * Handle touchstart event.
  */
-xiNET.Controller.prototype.touchStart = function(evt) {
+xiNET.Listeners.prototype.touchStart = function(evt) {
     //prevent default, but allow propogation
     evt.preventDefault();
     //~ //evt.returnValue = false;
@@ -74,28 +257,28 @@ xiNET.Controller.prototype.touchStart = function(evt) {
         this.force.stop();
     }
 
-    var p = this.getTouchEventPoint(evt);// seems to be correct, see below
-	this.dragStart = this.mouseToSVG(p.x, p.y);
-    this.state = MouseEventCodes.PANNING;
+    var p = this.controller.getTouchEventPoint(evt);// seems to be correct, see below
+	this.controller.dragStart = this.controller.mouseToSVG(p.x, p.y);
+    this.controller.state = MouseEventCodes.PANNING;
     //~ this.panned = false;
 };
 
 // dragging/rotation/panning/selecting
-xiNET.Controller.prototype.touchMove = function(evt) {
+xiNET.Listeners.prototype.touchMove = function(evt) {
     if (this.sequenceInitComplete) { // just being cautious
-        var p = this.getTouchEventPoint(evt);// seems to be correct, see below
-        var c = this.mouseToSVG(p.x, p.y);
+        var p = this.controller.getTouchEventPoint(evt);// seems to be correct, see below
+        var c = this.controller.mouseToSVG(p.x, p.y);
 
-        if (this.dragElement != null) { //dragging or rotating
+        if (this.controller.dragElement != null) { //dragging or rotating
             this.hideTooltip();
-            var dx = this.dragStart.x - c.x;
-            var dy = this.dragStart.y - c.y;
+            var dx = this.controller.dragStart.x - c.x;
+            var dy = this.controller.dragStart.y - c.y;
 
-            if (this.state ===  MouseEventCodes.DRAGGING) {
+            if (this.controller.state ===  MouseEventCodes.DRAGGING) {
                 // we are currently dragging things around
                 var ox, oy, nx, ny;
-                if (typeof this.dragElement.x === 'undefined') { // if not an Molecule
-                    var nodes = this.dragElement.interactors;
+                if (typeof this.controller.dragElement.x === 'undefined') { // if not an Molecule
+                    var nodes = this.controller.dragElement.interactors;
                     var nodeCount = nodes.length;
                     for (var i = 0; i < nodeCount; i++) {
                         var protein = nodes[i];
@@ -111,48 +294,48 @@ xiNET.Controller.prototype.touchMove = function(evt) {
                     }
                 } else {
                     //its a protein - drag it TODO: DRAG SELECTED
-                    ox = this.dragElement.x;
-                    oy = this.dragElement.y;
+                    ox = this.controller.dragElement.x;
+                    oy = this.controller.dragElement.y;
                     nx = ox - dx;
                     ny = oy - dy;
-                    this.dragElement.setPosition(nx, ny);
-                    this.dragElement.setAllLinkCoordinates();
+                    this.controller.dragElement.setPosition(nx, ny);
+                    this.controller.dragElement.setAllLinkCoordinates();
                 }
-                this.dragStart = c;
+                this.controller.dragStart = c;
             }
 
-            else if (this.state === MouseEventCodes.ROTATING) {
+            else if (this.controller.state === MouseEventCodes.ROTATING) {
                 // Distance from mouse x and center of stick.
-                var _dx = c.x - this.dragElement.x
+                var _dx = c.x - this.controller.dragElement.x
                 // Distance from mouse y and center of stick.
-                var _dy = c.y - this.dragElement.y;
+                var _dy = c.y - this.controller.dragElement.y;
                 //see http://en.wikipedia.org/wiki/Atan2#Motivation
                 var centreToMouseAngleRads = Math.atan2(_dy, _dx);
                 if (this.whichRotator === 0) {
                     centreToMouseAngleRads = centreToMouseAngleRads + Math.PI;
                 }
                 var centreToMouseAngleDegrees = centreToMouseAngleRads * (360 / (2 * Math.PI));
-                this.dragElement.setRotation(centreToMouseAngleDegrees);
-                this.dragElement.setAllLinkCoordinates();
+                this.controller.dragElement.setRotation(centreToMouseAngleDegrees);
+                this.controller.dragElement.setAllLinkCoordinates();
             }
             else { //not dragging or rotating yet, maybe we should start
                 // don't start dragging just on a click - we need to move the mouse a bit first
-                if (Math.sqrt(dx * dx + dy * dy) > (5 * this.z)) {
-                    this.state = MouseEventCodes.DRAGGING;
+                if (Math.sqrt(dx * dx + dy * dy) > (5 * this.controller.z)) { 
+                    this.controller.state = MouseEventCodes.DRAGGING;
 
                 }
             }
         }
 
-//    else if (this.state ===  MouseEventCodes.SELECTING) {
+//    else if (this.controller.state ===  MouseEventCodes.SELECTING) {
 //        this.updateMarquee(this.marquee, c);
 //    }
         else
         {
 
-        // if (this.state === MouseEventCodes.PANNING) {
+        // if (this.controller.state === MouseEventCodes.PANNING) {
             //~ xiNET.setCTM(this.container, this.container.getCTM()
-				//~ .translate(c.x - this.dragStart.x, c.y - this.dragStart.y));
+				//~ .translate(c.x - this.controller.dragStart.x, c.y - this.controller.dragStart.y));
         // }
         // else {
            // // this.showTooltip(p);
@@ -163,41 +346,40 @@ xiNET.Controller.prototype.touchMove = function(evt) {
 };
 
 // this ends all dragging and rotating
-xiNET.Controller.prototype.touchEnd = function(evt) {
-	this.preventDefaultsAndStopPropagation(evt);
-	if (this.dragElement != null) {
-		if (!(this.state === MouseEventCodes.DRAGGING || this.state === MouseEventCodes.ROTATING)) { //not dragging or rotating
-           		if (typeof this.dragElement.x === 'undefined') { //if not protein
-					//this.dragElement.showID();
+xiNET.Listeners.prototype.touchEnd = function(evt) {
+	this.controller.preventDefaultsAndStopPropagation(evt);
+	if (this.controller.dragElement != null) {
+		if (!(this.controller.state === MouseEventCodes.DRAGGING || this.controller.state === MouseEventCodes.ROTATING)) { //not dragging or rotating
+           		if (typeof this.controller.dragElement.x === 'undefined') { //if not protein
+					//this.controller.dragElement.showID();
 				} else {
-					if (this.dragElement.form === 0) {
-						this.dragElement.setForm(1);
+					if (this.controller.dragElement.form === 0) {
+						this.controller.dragElement.setForm(1);
 					} else {
-						this.dragElement.setForm(0);
+						this.controller.dragElement.setForm(0);
 					}
 				}
 			//~ this.checkLinks();
 		}
-		else if (this.state === MouseEventCodes.ROTATING) {
+		else if (this.controller.state === MouseEventCodes.ROTATING) {
 			//round protein rotation to nearest 5 degrees (looks neater)
-			this.dragElement.setRotation(Math.round(this.dragElement.rotation / 5) * 5);
+			this.controller.dragElement.setRotation(Math.round(this.controller.dragElement.rotation / 5) * 5);
 		}
 		else {
 		} //end of protein drag; do nothing
 	}
-	//~ else if (/*this.state !== xiNET.Controller.PANNING &&*/ evt.ctrlKey === false) {
+	//~ else if (/*this.controller.state !== xiNET.Listeners.PANNING &&*/ evt.ctrlKey === false) {
 		//~ this.clearSelection();
 	//~ }
 //~
-	//~ if (this.state === xiNET.Controller.SELECTING) {
+	//~ if (this.controller.state === xiNET.Listeners.SELECTING) {
 		//~ clearInterval(this.marcher);
 		//~ this.svgElement.removeChild(this.marquee);
 	//~ }
-	this.dragElement = null;
+	this.controller.dragElement = null;
 	this.whichRotator = -1;
-	this.state = MouseEventCodes.MOUSE_UP;
+	this.controller.state = MouseEventCodes.MOUSE_UP;
     return false;
 };
 
-
-module.exports = xiNET.Controller;
+module.exports = xiNET.Listeners;
