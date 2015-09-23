@@ -49,7 +49,9 @@
             "exprole": 'cvType',
             "identificationMethod": list_of_cvType,
             "expressedIn": 'organismType',
-            "features": 'listType_feature'
+			"parameters" : "listType_cvType",	
+			"confidences" : "listType_cvType",	
+			"features": 'listType_feature'
         },
 
 "feature" : {

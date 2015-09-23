@@ -5,7 +5,18 @@
 //    the Rappsilber Laboratory (http://www.rappsilberlab.org/).
 
 "use strict";
-
+/*
+//constructor for annotations
+function Annotation(annotName, startRes, endRes, colour, notes) {
+    this.name = annotName;
+    this.start = startRes;
+    this.end = endRes;
+    if (colour !== undefined && colour !== null) {
+        this.colour = colour;
+    }
+    this.notes = notes;
+}
+*/
 /* construtor parameter sequenceDatumString is string with following format:
  *
  *              "?-?" = unknown
@@ -19,7 +30,7 @@
  *              "123->256" = uncertain end between 256 and interactor.sequence.length
  */
 
-function SequenceDatum(molecule, sequenceDatumString) {
+function AnnotatedRegion(molecule, sequenceDatumString) {
 	this.molecule = molecule;
 	sequenceDatumString = sequenceDatumString.trim();
 
@@ -51,7 +62,7 @@ function SequenceDatum(molecule, sequenceDatumString) {
     }
 }
 
-SequenceDatum.prototype.toString = function(){
+AnnotatedRegion.prototype.toString = function(){
 	var string = "";
 	if (this.uncertainStart) string += this.uncertainStart + '..';
 	if (this.start) string += this.start + '-';
@@ -95,4 +106,4 @@ SequenceDatum.prototype.toString = function(){
 //> positions of the feature are <8 but it could happen that you have a
 //> feature such as "<8->22" or "<8-22", etc.
 
-module.exports = SequenceDatum;
+module.exports = AnnotatedRegion;

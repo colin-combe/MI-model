@@ -8,7 +8,7 @@
 
 "use strict";
 
-var SequenceDatum = require('./SequenceDatum');
+var AnnotatedRegion = require('./AnnotatedRegion');
 var Config = require('../../controller/Config');
 
 //constructor for annotations
@@ -39,7 +39,7 @@ function Feature(controller, json) {
 			}
 			var molecule = this.controller.molecules.get(mID);
 			console.log(">-"+molecule.id + "\t" + seqDatum.pos);
-			var seqData = new SequenceDatum(molecule, seqDatum.pos);
+			var seqData = new AnnotatedRegion(molecule, seqDatum.pos);
 			this.sequenceData.push(seqData);
 		}
 	}

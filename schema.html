@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		<link rel="stylesheet" type="text/css" href="./vendor/jsontree.css">
+		<script type="text/javascript" src="./vendor/d3.js"></script>
+        <script type="text/javascript" src="./vendor/jsontree.min.js"></script>
+        </head>
+    <body>
+
+	<div id="schemaDiv" style="width:100%;height:100%"></div>
+	<script>
+		
+		d3.json("mi-json-schema.json", function(data) {
+			document.getElementById("schemaDiv").innerHTML = JSONTree.create(data);
+		});
+	
+	</script>
