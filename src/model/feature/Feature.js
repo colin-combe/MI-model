@@ -26,7 +26,7 @@ function Feature(controller, json) {
 	if (typeof json.detmethod !== 'undefined') {
 		featureName += ', ' + feature.detmethod.name;
 	}
-	this.sequenceData = [];
+	this.annotatedRegions = [];
 	// the id info we need is inside sequenceData att
 	if (json.sequenceData) {
 		var seqData = json.sequenceData;
@@ -37,10 +37,12 @@ function Feature(controller, json) {
 			if (this.controller.expand)	{
 				mID = mID	+ "(" + seqDatum.participantRef + ")";
 			}
-			var molecule = this.controller.molecules.get(mID);
-			console.log(">-"+molecule.id + "\t" + seqDatum.pos);
-			var seqData = new AnnotatedRegion(molecule, seqDatum.pos);
-			this.sequenceData.push(seqData);
+			var polymer = this.controller.molecules.get(mID);
+			console.log(">-"+polymer.id + "\t" + seqDatum.pos);
+			
+			var annotatedRegion = new AnnotatedRegion(featureName, polymer, seqDatum.pos);
+			
+			this.annotatedRegions.push(annotatedRegion);
 		}
 	}
 }

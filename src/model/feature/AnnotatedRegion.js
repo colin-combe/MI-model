@@ -5,18 +5,7 @@
 //    the Rappsilber Laboratory (http://www.rappsilberlab.org/).
 
 "use strict";
-/*
-//constructor for annotations
-function Annotation(annotName, startRes, endRes, colour, notes) {
-    this.name = annotName;
-    this.start = startRes;
-    this.end = endRes;
-    if (colour !== undefined && colour !== null) {
-        this.colour = colour;
-    }
-    this.notes = notes;
-}
-*/
+
 /* construtor parameter sequenceDatumString is string with following format:
  *
  *              "?-?" = unknown
@@ -30,8 +19,10 @@ function Annotation(annotName, startRes, endRes, colour, notes) {
  *              "123->256" = uncertain end between 256 and interactor.sequence.length
  */
 
-function AnnotatedRegion(molecule, sequenceDatumString) {
-	this.molecule = molecule;
+function AnnotatedRegion(name, polymer, sequenceDatumString, colour) {
+	this.name = name;
+	this.polymer = polymer;
+	this.colour = colour;
 	sequenceDatumString = sequenceDatumString.trim();
 
     this.uncertainStart = null;
@@ -70,6 +61,7 @@ AnnotatedRegion.prototype.toString = function(){
 	if (this.uncertainEnd) string += '..' + this.uncertainEnd;
 	return string;
 }
+
 //On 06/06/13 09:22, marine@ebi.ac.uk wrote:
 //> Concerning the ranges, I think there was a confusion :
 //>
