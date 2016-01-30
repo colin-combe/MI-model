@@ -34,7 +34,7 @@ var d3 = require('d3');
 var Config = require('./Config');
 var MouseEventCodes = require('./MouseEventCodes');
 //for save file.
-var FileSaver = require('file-saver.js');
+//~ var FileSaver = require('file-saver.js');
 
 xiNET.Listeners = function(controller) {
 	this.controller = controller;
