@@ -1,7 +1,7 @@
 {
-  "name": "interactionviewer",
+  "name": "MI-model",
   "version": "2.0.0-alpha.0",
-  "description": "A network visualisation that displays molecular interaction data, including detailed residue-level information such as binding sites. v1 is used in EBI's Complex Portal. The aim for v2 is a general purpose viewer for PSI-MI XML data",
+  //"description": "A network visualisation that displays molecular interaction data, including detailed residue-level information such as binding sites. v1 is used in EBI's Complex Portal. The aim for v2 is a general purpose viewer for PSI-MI XML data",
   "author": {
     "name": "Colin Combe",
     "email": "colin.combe@ed.ac.uk"

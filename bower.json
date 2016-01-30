@@ -1,7 +1,7 @@
 {
-  "name": "interactionviewer",
+  "name": "MI-model",
   "version": "2.0.0-alpha.0",
-  "homepage": "https://github.com/MICommunity/interaction-viewer",
+  "homepage": "https://github.com/MICommunity/MI-model",
   "license": "Apache v2.0",
   "ignore": [
     "**/.*",
@@ -11,6 +11,7 @@
     "tests"
   ],
   "dependencies": {
+	//todo : update , no d3 or colorbrewer; backbone, underscore, zepto instead
     "d3": "~3.5.5",
     "colorbrewer": "~1.0.0"
   }
