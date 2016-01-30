@@ -1,8 +1,8 @@
 {
   "name": "interactionviewer",
-  "version": "0.0.1",
+  "version": "2.0.0-alpha.0",
   "homepage": "https://github.com/MICommunity/interaction-viewer",
-  "license": "MIT",
+  "license": "Apache v2.0",
   "ignore": [
     "**/.*",
     "node_modules",

@@ -19,9 +19,9 @@ function FeatureLink(id, fromFeatPos, toFeatPos, xlvController) {
     this.fromSequenceData = fromFeatPos;
     this.toSequenceData = toFeatPos;
     this.interactors = [this.fromSequenceData[0].node, this.toSequenceData[0].node];//*
-    // *potentially, this over simplifies the situation, 
+    // *potentially, this over simplifies the situation,
     // but there is a workaround in way ReadMiJson init's links so OK for now
-	
+
 }
 
 FeatureLink.prototype.getToolTip = function(){
@@ -151,7 +151,14 @@ FeatureLink.prototype.hide = function() {
 	if (this.interactors[0] === this.interactors[1]){
 		containingGroup = this.controller.selfRes_resLinks;
 	}
-	if (containingGroup.contains(this.glyph)) {
+
+  var groupChildren = []
+
+  for (var i = 0; i < containingGroup.childNodes.length; i++) {
+    groupChildren[i] = containingGroup.childNodes[i];
+  }
+
+	if (groupChildren.indexOf(this.glyph) > -1) {
 		containingGroup.removeChild(this.glyph);
 		containingGroup.removeChild(this.uncertainGlyph);
 		containingGroup.removeChild(this.highlightGlyph);
@@ -323,11 +330,11 @@ FeatureLink.prototype.setLinkCoordinates = function(interactor) {
             highlightGlyphPath += getPathSegments(triPointMid, ttMid,
                     highlightStartRes, highlightEndRes, toMolecule, tyOffset);
         }
-		
+
 		if (!this.glyph){
 			this.initSVG();
 		}
-		
+
         this.glyph.setAttribute("d", glyphPath);
         this.uncertainGlyph.setAttribute("d", uncertainGlyphPath);
         this.highlightGlyph.setAttribute("d", highlightGlyphPath);

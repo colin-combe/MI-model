@@ -16,6 +16,8 @@ var Link = require('./Link');
 var Config = require('../../controller/Config');
 var Molecule = require('../molecule/Molecule');
 
+var d3 = require('d3');
+
 NaryLink.naryColours = d3.scale.ordinal().range(colorbrewer.Paired[6]);//d3.scale.category20c();//d3.scale.ordinal().range(colorbrewer.Paired[12]);//
 NaryLink.orbitNodes = 16;
 NaryLink.orbitRadius = 20;
@@ -69,7 +71,7 @@ NaryLink.prototype.showHighlight = function(show) {
 NaryLink.prototype.check = function() {
     this.show();  
     
-    if (this.controller.sequenceInitComplete == true) {
+   /* if (this.controller.sequenceInitComplete == true) {
 		var interactions = this.getInteractions();
 		var interactionCount = interactions.length;
 		for (var i = 0; i < interactionCount; i++) {//for each interaction
@@ -93,8 +95,9 @@ NaryLink.prototype.check = function() {
 				}
 			}
 		}
-	}
-    
+	}*/
+
+    this.show();
     return true;
 };
 
@@ -107,7 +110,7 @@ NaryLink.prototype.show = function() {
 NaryLink.prototype.hide = function() {};
 
 NaryLink.prototype.setLinkCoordinates = function() {
-    // Uses d3.geom.hull to calculate a bounding path around an array of vertices 
+    // Uses d3.geom.hull to calculate a bounding path around an array of vertices
     var calculateHullPath = function(values) {
 		self.hull = d3.geom.hull(values);
 		return "M" + self.hull.join("L") + "Z";
@@ -135,7 +138,7 @@ NaryLink.prototype.getMappedCoordinates = function() {
 		else if (interactor.form === 1){
 			var start = interactor.getResidueCoordinates(0);
 			var end = interactor.getResidueCoordinates(interactor.size);
-			if (!isNaN(start[0]) && !isNaN(start[1]) && 
+			if (!isNaN(start[0]) && !isNaN(start[1]) &&
 								!isNaN(end[0]) && !isNaN(end[1])){
 				mapped.push(start);
 				mapped.push(end);
