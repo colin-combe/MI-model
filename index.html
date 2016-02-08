@@ -21,7 +21,7 @@
     <body>
 
         <div style="height:100%;">
-		<div id="networkContainer"></div>
+		<div id="viewContainer"></div>
 		<div id='controls'>
 
 			<select id="dataSets" onChange="loadData();">
@@ -35,6 +35,7 @@
 				<option>./demo/data/complex/EBI-8869931.json</option>
 				<option>./demo/data/complex/EBI-9008283.json</option>
 				<option>./demo/data/complex/EBI-9997373.json</option>
+				<option>./demo/data/complex/EBI-11509704.json</option>
 			</select>
 
 			<input checked onclick="loadData()" id="chkexpansion" value="expansion" type="checkbox">Stoich. expansion
@@ -42,16 +43,6 @@
 			<button onclick="exportSVG();">Export SVG</button>
 			<button onclick="xlv.expandAll();">Expand All</button>
 			<button onclick="xlv.collapseAll();">Collapse All</button>
-
-<!--
-			<select id="annotationsSelect" onChange="changeAnnotations();">
-				<option selected='selected'>MI features</option>
-				<option>UniprotKB</option>
-				<option>SuperFamily</option>
-				<option>None</option>
-				<option>Interactor</option>
-			</select>
--->
 
 		</div>
 			<div id="networkCaption">
@@ -106,82 +97,26 @@
 					</table>
 				</div>
 
-				<div id="colours"></div>
-
-<!--
-				<a href="./index.html"><h2>Complex data examples</h2></a>
-				<a href="./demo/evidence.html"><h2>Evidence data examples</h2></a>
-				<a href="https://github.com/MICommunity/interaction-viewer/tree/master/src/controller"><h2>GitHub</h2></a>
--->
 			</div>
         </div>
 
         <script type="text/javascript">
                 //<![CDATA[
 
-                var targetDiv = document.getElementById('networkContainer');
-                xlv = new xiNET(targetDiv);
-                
-                var legend = d3.select("svg").append("g");
-                xlv.legendCallbacks.push(function (colourAssignment) {
-					var coloursKeyDiv = document.getElementById('colours');			
-					if (colourAssignment){
-						//html legened
-						/*
-						var table = "<table><tr style='height:10px;'></tr><tr><td style='width:80px;margin:10px;"
-									+ "background:#70BDBD;opacity:0.3;border:none;'>"
-									+ "</td><td>your complex</td></tr>";
-								var domain = colourAssignment.domain();
-							//~ console.log("Domain:"+domain);
-							var range = colourAssignment.range();
-							//~ console.log("Range:"+range);
-							table += "<tr style='height:10px;'></tr>";
-							for (var i = 0; i < domain.length; i ++){
-								//make transparent version of colour
-								var temp = new RGBColor(range[i%20]);
-								var trans = "rgba(" +temp.r+","+temp.g+","+temp.b+ ", 0.6)";
-								table += "<tr><td style='width:75px;margin:10px;background:"
-										+ trans + ";border:1px solid " 
-										+ range[i%20] + ";'></td><td>"
-										+ domain[i] +"</td></tr>";
-								//~ console.log(i + " "+ domain[i] + " " + range[i]);
-							}
-
-						}
-						table = table += "</table>";
-						coloursKeyDiv.innerHTML = table;					
-						*/
-						//d3 svg legend
-						verticalLegend = d3.svg.legend().labelFormat("none").cellPadding(5).orientation("vertical").units(xlv.annotationChoice).cellWidth(25).cellHeight(18).inputScale(colourAssignment);
-						legend.selectAll("*").remove();
-						legend.attr("transform", "translate(20,40)").attr("class", "legend").call(verticalLegend);
-					}
-
-				});
+                var targetDiv = document.getElementById('viewContainer');
 
                 loadData();
 
                 function loadData(){
-					xlv.clear();
+					//xlv.clear();
 					var matrixExpansion = document.getElementById("chkexpansion").checked;
 					var dataSetsSelect = document.getElementById('dataSets');
 					var path = dataSetsSelect.options[dataSetsSelect.selectedIndex].value;
 				    d3.json(path, function(data) {
-						xlv.readMIJSON(data, matrixExpansion);
+						//xlv.readMIJSON(data, matrixExpansion);
 					});
 				 }
 
-				function changeAnnotations(){
-					var annotationSelect = document.getElementById('annotationsSelect');
-					xlv.setAnnotations(annotationSelect.options[annotationSelect.selectedIndex].value);
-				}
-				
-				function exportSVG(){
-					var xml = xlv.getSVG();
-					xmlAsUrl = 'data:image/svg;filename=xiNET-output.svg,';
-					xmlAsUrl += encodeURIComponent(xml);
-					var win = window.open(xmlAsUrl, 'xiNET-output.svg');
-				}
                 //]]>
         </script>
 

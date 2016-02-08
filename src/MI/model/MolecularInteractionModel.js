@@ -7,7 +7,7 @@
 
 (function(win) {
 	"use strict";
-
+	
 	var Interactor = require('./interactor/interactor');
 	var Polymer = require('./interactor/Polymer');
 	var Protein = require('./interactor/Protein');
@@ -21,7 +21,7 @@
 	var FeatureLink = require('../link/FeatureLink');
 	var Feature = require('./feature/Feature');
 	var Annotation = require('./feature/AnnotatedRegion');
-
+	
 	win.MI = win.MI || {};
 	win.MI.model = win.MI.model || {};
 
@@ -29,101 +29,37 @@
 		defaults : {
 			interactors: new Map (),
 			participants: new Map(),
-			features = new Map(),
+			features = new Map(),	
 			naryLinks = new Map(),
 			featureLinks = new Map()
 		},
 
 		initialize: function (options) {
 
-			var defaultOptions = {};
+			var defaultOptions = {
+				//default is to expand stoichiometry
+				expandStoichiometry: true
+			};
 
 			this.options = _.extend(defaultOptions, options);
-
-
 
 		},
 
 		readMiJson : function (json) {
-
-			//check that we've got a parsed javascript object here, not a String
+		
+		    //check that we've got a parsed javascript object here, not a String
 			miJson = (typeof miJson === 'object') ? miJson : JSON.parse(miJson);
-			//default is to expand
+			
 			if (typeof expand === 'undefined'){expand = true;}
 			this.expand = expand;//naryLink checks this when deciding colour
 			var data = miJson.data;
 			var dataElementCount = data.length;
 			var self = this;
-
+			
 			var complexes = d3.map();
 			var needsSequence = d3.set();//things that need seq looked up
+
 			expand? readStoichExpanded() : readStoichUnexpanded();
-
-			/*
-			 * loop through particpants and features
-			 * init binary, unary and feature links,
-			 * and make needed associations between these and containing naryLink
-			 */
-
-			//~ for (var l = 0; l < dataElementCount; l++) {//for each interaction
-					//~ var interaction = data[l];
-					//~ if (interaction.object === 'interaction') {
-						//~ var jsonParticipants = interaction.participants;
-						//~ var participantCount = jsonParticipants.length
-		//~
-						//~ for (var pi = 0; pi < participantCount; pi++){// for each particpant
-							//~ var jsonParticipant = jsonParticipants[pi];
-							//~ var features = new Array(0);
-							//~ if (jsonParticipant.features) features = jsonParticipant.features;
-		//~
-							//~ var fCount = features.length;
-							//~ for (var f = 0; f < fCount; f++){// for each feature
-								//~ var feature = features[f];
-								//~ var fromSequenceData = feature.sequenceData;
-								//~ if (feature.linkedFeatures) {
-									//~ var linkedFeatureIDs = feature.linkedFeatures;
-									//~ // break feature links to different nodes into seperate binary links
-									//~ var toSequenceData_indexedByNodeId = d3.map();
-									//~ var linkedFeatureCount = linkedFeatureIDs.length;
-									//~ for (var lfi = 0; lfi < linkedFeatureCount; lfi++){
-										//~ var linkedFeature = self.features.get(linkedFeatureIDs[lfi])
-										//~ var seqDataCount = linkedFeature.sequenceData.length;
-										//~ for (var s = 0; s < seqDataCount; s++){
-											//~ var seqData = linkedFeature.sequenceData[s];
-											//~ var nodeId = seqData.interactorRef;
-											//~ if (expand) {
-												//~ nodeId = nodeId + '(' + seqData.participantRef + ')';
-											//~ }
-											//~ var toSequenceData = toSequenceData_indexedByNodeId.get(nodeId);
-											//~ if (typeof toSequenceData === 'undefined'){
-												//~ toSequenceData = new Array();
-												//~ toSequenceData_indexedByNodeId.set(nodeId, toSequenceData);
-											//~ }
-											//~ toSequenceData = toSequenceData.push(seqData)
-										//~ }
-									//~ }
-									//~ var countEndNodes = toSequenceData_indexedByNodeId.values().length;
-									//~ for (var n = 0; n < countEndNodes; n++) {
-										//~ toSequenceData = toSequenceData_indexedByNodeId.values()[n];
-										//~ var fromMolecule = getNode(fromSequenceData[0]);
-										//~ var toMolecule = getNode(toSequenceData[0]);
-										//~ var link;
-										//~ if (fromMolecule === toMolecule){
-											//~ link = getUnaryLink(fromMolecule, interaction);
-										//~ }
-										//~ else {
-											//~ link = getBinaryLink(fromMolecule, toMolecule, interaction);
-										//~ }
-										//~ var sequenceLink = getFeatureLink(fromSequenceData, toSequenceData, interaction);
-										//~ fromMolecule.sequenceLinks.set(sequenceLink.id, sequenceLink);
-										//~ toMolecule.sequenceLinks.set(sequenceLink.id, sequenceLink);
-										//~ link.sequenceLinks.set(sequenceLink.id, sequenceLink);
-									//~ }
-								//~ }
-							//~ }
-						//~ }
-				//~ }
-			//~ }
 
 			//init complexes
 			var complexes = complexes.values()
@@ -211,7 +147,7 @@
 							//doesn't already exist, make new nLink
 							nLink = new NaryLink(nLinkId, self);
 							self.allNaryLinks.set(nLinkId, nLink);
-							//alot of time could be spent creating and recreating these IDs,
+							//alot of time could be spent creating and recreating these IDs, 
 							//stash them in the interaction object
 							interaction.naryId =  nLinkId;
 
@@ -244,7 +180,7 @@
 						}
 					}
 				}
-
+				
 				indexFeatures();
 
 			};
@@ -443,6 +379,7 @@
 					return nodeIds.values().sort().join(';');
 				}
 
+
 				var start =  seqDataToString(fromSequenceData);
 				var end =  seqDataToString(toSequenceData);
 				var seqLinkId, endsSwapped;
@@ -479,11 +416,11 @@
 				nLink.sequenceLinks.set(seqLinkId, sequenceLink);
 				return sequenceLink;
 			};
-
+			
 		},
 
 		expandStoichiometery : function (miJson) {
-
+			
 			var startTime =  +new Date();
 
 			// We'll need collections of our interactions and interactors for later..
@@ -522,7 +459,7 @@
 							// Now clone the participant and link it to the new cloned interactor
 							// This method of cloning appears to work so far.
 							var clonedParticipant = JSON.parse(JSON.stringify(participant));
-
+							
 							//~ clonedParticipant.interactorRef = clonedInteractor.id;
 							clonedParticipant.id = clonedParticipant.id + "_" + i;
 
@@ -609,7 +546,7 @@
 					}
 				}
 			}
-
+			
 		}
 
 	});
