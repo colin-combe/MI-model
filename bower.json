@@ -11,6 +11,6 @@
     "tests"
   ],
   "dependencies": {
-    "whatGoesHereJosh": "?"
+    "backbone": "~1.2.3"
   }
 }
