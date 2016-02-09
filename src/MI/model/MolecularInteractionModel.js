@@ -50,17 +50,26 @@
 		    //check that we've got a parsed javascript object here, not a String
 			miJson = (typeof miJson === 'object') ? miJson : JSON.parse(miJson);
 			
-			if (typeof expand === 'undefined'){expand = true;}
-			this.expand = expand;//naryLink checks this when deciding colour
 			var data = miJson.data;
 			var dataElementCount = data.length;
 			var self = this;
 			
-			var complexes = d3.map();
-			var needsSequence = d3.set();//things that need seq looked up
+			//temporarily disabled - see note below
+			//var complexes = new Map ();
+			
+			//disabled - see note below
+			//var needsSequence = new Set();//things that need seq looked up
 
-			expand? readStoichExpanded() : readStoichUnexpanded();
+			if (this.options.expandStoichiometry === true) {
+				readStoichExpanded()}
+			else {
+				readStoichUnexpanded();
+			}
 
+			/*
+			 * temp disabled for simplicity
+			 */
+			/*
 			//init complexes
 			var complexes = complexes.values()
 			for (var c = 0; c < complexes.length; c++) {
@@ -82,9 +91,12 @@
 				complexes[c].initMolecule(naryLink);
 				naryLink.complex = complexes[c];
 			}
-			self.checkLinks();
-			self.initLayout();
+			*/
 
+			/*
+			 * Not looking up sequences or features from UniProt until new JSON service is available
+			 */
+			/*
 			//lookup missing sequences
 			var nsIds = needsSequence.values();
 			var nsCount = nsIds.length;
@@ -104,10 +116,10 @@
 					);
 				}
 			}
+			*/
 
 			function readStoichExpanded(){
-				//get interactors
-				var interactors = d3.map();
+				var interactors = this.get("interactors");
 				for (var n = 0; n < dataElementCount; n++) {
 					if (data[n].object === 'interactor') {
 						var interactor = data[n];
@@ -216,11 +228,11 @@
 					}
 					else {
 						//should look it up using accession number
-						if (participantId.indexOf('uniprotkb') === 0){
-							needsSequence.add(participantId);
-						} else {
+						//~ if (participantId.indexOf('uniprotkb') === 0){
+							//~ needsSequence.add(participantId);
+						//~ } else {
 							participant.setSequence("SEQUENCEMISSING");
-						}
+						//~ }
 					}
 				}
 				//genes
@@ -364,7 +376,7 @@
 
 			function getFeatureLink(fromSeqData, toSeqData, interaction){
 				function seqDataToString(seqData){
-					var nodeIds = d3.set();//used to eliminate duplicates
+					var nodeIds = new Set ();//used to eliminate duplicates
 					//make id
 					for (var s = 0; s < seqData.length; s++){
 						var seq = seqData[s];
@@ -491,7 +503,7 @@
 				});
 
 				// Get ALL of our features.
-				var featureMap = d3.map();
+				var featureMap = new Map ();
 				interaction.participants.forEach(function(participant) {
 					if (participant.features) {
 						participant.features.forEach(function(feature) {
