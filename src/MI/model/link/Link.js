@@ -8,13 +8,11 @@
 //
 //		Link.js
 //		The graphical representation of one or many interactions.
-//		One link represents all interactions with same particpants.
+//		One link represents all interactions with same particpants or same linked featrues.
 //		E.g. psi-mi may conatins multiple experiments giving evidence for same interaction
 //		- using one glyph to represent them all prevents uppermost graphic from occluding those lower down
 
 "use strict";
-
-var Config = require('../../controller/Config');
 
 var Link = function (){};
 

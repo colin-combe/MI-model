@@ -1,0 +1,6 @@
+/*
+*intercator
+* id
+* naryLinks
+* featureLinks
+*/
