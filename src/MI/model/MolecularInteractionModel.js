@@ -7,13 +7,13 @@
 
 (function(win) { // global fudge
 	"use strict";
-	
+
 	var Participant = require('./Participant.js');
 	var NaryLink = require('./link/NaryLink');
 	var FeatureLink = require('../link/FeatureLink');
 	var Feature = require('./feature/Feature');
 	var AnnotationRegion = require('./feature/AnnotatedRegion');
-	
+
 	win.MI = win.MI || {};
 	win.MI.model = win.MI.model || {};
 
@@ -21,7 +21,7 @@
 		defaults : {
 			interactors: new Map (),
 			participants: new Map(),
-			features = new Map(),	
+			features = new Map(),
 			naryLinks = new Map(),
 			featureLinks = new Map()
 		},
@@ -38,14 +38,14 @@
 		},
 
 		readMiJson : function (miJson) {
-		
+
 		    //check that we've got a parsed javascript object here, not a String
 			miJson = (typeof miJson === 'object') ? miJson : JSON.parse(miJson);
-			
+
 			var data = miJson.data;
 			var dataElementCount = data.length;
 			var self = this;
-			
+
 			//index interactors
 			var interactors = this.get("interactors");
 			for (var n = 0; n < dataElementCount; n++) {
@@ -53,9 +53,9 @@
 					var interactor = data[n];
 					interactors.set(interactor.id, interactor);
 				}
-			}		
-			
-			//create naryLinks and participants			
+			}
+
+			//create naryLinks and participants
 			if (this.options.expandStoichiometry === true) {
 				miJson = expandStoichiometry(miJson);
 				readStoichExpanded()}
@@ -81,7 +81,81 @@
 					}
 				}
 			}
-					
+
+/*
+			// loop through particpants and features
+			// init binary, unary and sequence links,
+			// and make needed associations between these and containing naryLink
+			for (var l = 0; l < dataElementCount; l++) {
+					var interaction = data[l];
+					if (interaction.object === 'interaction') {
+					var jsonParticipants = interaction.participants;
+					var participantCount = jsonParticipants.length
+
+					for (var pi = 0; pi < participantCount; pi++){
+						var jsonParticipant = jsonParticipants[pi];
+						var features = new Array(0);
+						if (jsonParticipant.features) features = jsonParticipant.features;
+
+						var fCount = features.length;
+						for (var f = 0; f < fCount; f++){// for each feature
+							var feature = features[f];
+							var fromSequenceData = feature.sequenceData;
+							if (feature.linkedFeatures) { // if linked features
+								var linkedFeatureIDs = feature.linkedFeatures;
+
+
+								var linkedFeatureCount = linkedFeatureIDs.length;
+								for (var lfi = 0; lfi < linkedFeatureCount; lfi++){ //for each linked feature
+
+									// !! following is a hack, code can't deal with
+									// !! composite binding region across two different interactors
+									// break feature links to different nodes into seperate binary links
+									var toSequenceData_indexedByNodeId = d3.map();
+
+									var linkedFeature = self.features.get(linkedFeatureIDs[lfi])
+									var seqDataCount = linkedFeature.sequenceData.length;
+									for (var s = 0; s < seqDataCount; s++){
+										var seqData = linkedFeature.sequenceData[s];
+										var nodeId = seqData.interactorRef;
+										if (expand) {
+											nodeId = nodeId + '(' + seqData.participantRef + ')';
+										}
+										var toSequenceData = toSequenceData_indexedByNodeId.get(nodeId);
+										if (typeof toSequenceData === 'undefined'){
+											toSequenceData = new Array();
+											toSequenceData_indexedByNodeId.set(nodeId, toSequenceData);
+										}
+										toSequenceData = toSequenceData.push(seqData)
+									}
+
+									var countEndNodes = toSequenceData_indexedByNodeId.values().length;
+									for (var n = 0; n < countEndNodes; n++) {
+										toSequenceData = toSequenceData_indexedByNodeId.values()[n];
+										var fromMolecule = getNode(fromSequenceData[0]);
+										var toMolecule = getNode(toSequenceData[0]);
+										var link;
+										if (fromMolecule === toMolecule){
+											link = getUnaryLink(fromMolecule, interaction);
+										}
+										else {
+											link = getBinaryLink(fromMolecule, toMolecule, interaction);
+										}
+										var sequenceLink = getFeatureLink(fromSequenceData, toSequenceData, interaction);
+										fromMolecule.sequenceLinks.set(sequenceLink.id, sequenceLink);
+										toMolecule.sequenceLinks.set(sequenceLink.id, sequenceLink);
+										link.sequenceLinks.set(sequenceLink.id, sequenceLink);
+									}
+
+								}// end for each linked feature
+
+							}// end if linked features
+						}// end for each feature
+					}
+				}
+			}
+*/
+
 			function readStoichExpanded(){
 
 				//add naryLinks and participants
@@ -98,7 +172,7 @@
 							//doesn't already exist, make new nLink
 							nLink = new NaryLink(nLinkId, self);
 							self.allNaryLinks.set(nLinkId, nLink);
-							//alot of time could be spent creating and recreating these IDs, 
+							//alot of time could be spent creating and recreating these IDs,
 							//stash them in the interaction object
 							interaction.naryId =  nLinkId;
 
@@ -270,7 +344,7 @@
 			};
 
 			function expandStoichiometry(miJson) {
-					
+
 					var startTime =  +new Date();
 
 					// We'll need collections of our interactions and interactors for later..
@@ -309,7 +383,7 @@
 									// Now clone the participant and link it to the new cloned interactor
 									// This method of cloning appears to work so far.
 									var clonedParticipant = JSON.parse(JSON.stringify(participant));
-									
+
 									//~ clonedParticipant.interactorRef = clonedInteractor.id;
 									clonedParticipant.id = clonedParticipant.id + "_" + i;
 
@@ -386,7 +460,7 @@
 					//actually the expansion code doesn't seem to take up that much time
 					//console.log("Expand time:" + ( +new Date() - startTime));
 					return json
-					
+
 					// Returns the first object in an array that has an attribute with a matching value.
 					function findFirstObjWithAttr(collection, attribute, value) {
 						for(var i = 0; i < collection.length; i += 1) {
@@ -394,10 +468,10 @@
 								return collection[i];
 							}
 						}
-					}			
-							
+					}
+
 				}
-			
+
 		},
 
 	});
