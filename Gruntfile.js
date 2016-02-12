@@ -9,7 +9,7 @@ module.exports = taskManager = function(grunt) {
     },
     browserify: {
       all: {
-        src: ['src/MI/model/MolecularInteractionData.js'],
+        src: ['src/MI/model/MolecularInteractionModel.js'],
         dest: 'build/<%= config.package.name %>.js',
         options: {
           browserifyOptions: {

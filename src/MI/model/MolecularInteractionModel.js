@@ -5,7 +5,7 @@
 //
 //      MolecularInteractionData.js
 
-(function(win) { // global fudge
+//~ (function(win) { // global fudge
 	"use strict";
 
 	var Participant = require('./Participant.js');
@@ -14,10 +14,10 @@
 	var Feature = require('./feature/Feature');
 	var AnnotationRegion = require('./feature/AnnotatedRegion');
 
-	win.MI = win.MI || {};
-	win.MI.model = win.MI.model || {};
+	MI = MI || {};
+	MI.model = MI.model || {};
 
-	win.MI.model.MolecularInteractionModel = Backbone.Model.extend ({
+	MI.model.MolecularInteractionModel = Backbone.Model.extend ({
 		defaults : {
 			interactors: new Map (),
 			participants: new Map(),
@@ -399,7 +399,8 @@
 											feature.clonedfrom = feature.id;
 											feature.id = feature.id + "_" + i;
 
-											// Also, adjust our sequence data
+										
+module.exports = Feature;	// Also, adjust our sequence data
 											feature.sequenceData.forEach(function(sequenceData) {
 												sequenceData.participantRef = clonedParticipant.id;
 												//~ sequenceData.interactorRef = clonedInteractor.id;
@@ -476,4 +477,6 @@
 
 	});
 
-} (this));  // end global fudge
+//~ } (this));  // end global fudge
+
+module.exports = MI.model.MolecularInteractionModel;
