@@ -11,16 +11,8 @@
 
 "use strict";
 
-var colorbrewer = require('colorbrewer');
 var Link = require('./Link');
-var Config = require('../../controller/Config');
-var Molecule = require('../molecule/Molecule');
-
-var d3 = require('d3');
-
-NaryLink.naryColours = d3.scale.ordinal().range(colorbrewer.Paired[6]);//d3.scale.category20c();//d3.scale.ordinal().range(colorbrewer.Paired[12]);//
-NaryLink.orbitNodes = 16;
-NaryLink.orbitRadius = 20;
+var Participant = require('../Participant');
 
 NaryLink.prototype = new Link();
 

@@ -9,7 +9,6 @@
 "use strict";
 
 var AnnotatedRegion = require('./AnnotatedRegion');
-var Config = require('../../controller/Config');
 
 //constructor for annotations
 function Feature(controller, json) {

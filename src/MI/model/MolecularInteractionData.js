@@ -1,29 +1,28 @@
 //      MI-model
+//		License: Apache v2.0
 //      Copyright 2015 Rappsilber Laboratory, Edinburgh University
-//
 //      authors: Colin Combe, Josh Heimbach
-//
 //      MolecularInteractionData.js
 
 //~ (function(win) { // global fudge
 	"use strict";
 
-	var Participant = require('./Participant.js');
+	var Participant = require('./Participant');
 	var NaryLink = require('./link/NaryLink');
-	var FeatureLink = require('../link/FeatureLink');
+	var FeatureLink = require('./link/FeatureLink');
 	var Feature = require('./feature/Feature');
 	var AnnotationRegion = require('./feature/AnnotatedRegion');
 
 	MI = MI || {};
 	MI.model = MI.model || {};
 
-	MI.model.MolecularInteractionModel = Backbone.Model.extend ({
+	MI.model.MolecularInteractionData = Backbone.Model.extend ({
 		defaults : {
 			interactors: new Map (),
 			participants: new Map(),
-			features = new Map(),
-			naryLinks = new Map(),
-			featureLinks = new Map()
+			features: new Map(),
+			naryLinks: new Map(),
+			featureLinks: new Map()
 		},
 
 		initialize: function (options) {

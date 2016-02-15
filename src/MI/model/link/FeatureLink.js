@@ -8,11 +8,9 @@
 
 var Link = require('./Link');
 var AnnotatedRegion = require('../feature/AnnotatedRegion');
-//~ var BinaryLink = require('./BinaryLink');
-//~ var UnaryLink = require('./UnaryLink');
-var Config = require('../../controller/Config');
 
 FeatureLink.prototype = new Link();
+
 function FeatureLink(id, fromFeatPos, toFeatPos, xlvController) {
     this.id = id;
     this.controller = xlvController;
