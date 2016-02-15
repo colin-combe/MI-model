@@ -1,17 +1,17 @@
-//      MI-model
-//		License: Apache v2.0
-//      Copyright 2015 Rappsilber Laboratory, Edinburgh University
-//      authors: Colin Combe, Josh Heimbach
-//      MolecularInteractionData.js
+//  MI-model
+//	License: Apache v2.0
+//  Copyright 2015 Rappsilber Laboratory, Edinburgh University
+//  authors: Colin Combe, Josh Heimbach
+//  MI.model.MolecularInteractionData.js
 
 //~ (function(win) { // global fudge
 	"use strict";
 
 	var Participant = require('./Participant');
-	var NaryLink = require('./link/NaryLink');
-	var FeatureLink = require('./link/FeatureLink');
-	var Feature = require('./feature/Feature');
-	var AnnotationRegion = require('./feature/AnnotatedRegion');
+	var NaryLink = require('./NaryLink');
+	var FeatureLink = require('./FeatureLink');
+	var Feature = require('./Feature');
+	var AnnotationRegion = require('./AnnotatedRegion');
 
 	MI = MI || {};
 	MI.model = MI.model || {};
@@ -478,4 +478,4 @@ module.exports = Feature;	// Also, adjust our sequence data
 
 //~ } (this));  // end global fudge
 
-module.exports = MI.model.MolecularInteractionModel;
+module.exports = MI.model.MolecularInteractionData;

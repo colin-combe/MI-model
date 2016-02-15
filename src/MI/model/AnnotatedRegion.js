@@ -1,12 +1,11 @@
-//    xiNET interaction viewer
-//    Copyright 2013 Rappsilber Laboratory
-//
-//    This product includes software developed at
-//    the Rappsilber Laboratory (http://www.rappsilberlab.org/).
+//  MI-model
+//	License: Apache v2.0
+//  authors: Colin Combe, Josh Heimbach
+//  MI.model.AnnotatedRegion.js
 
 "use strict";
 
-/* construtor parameter sequenceDatumString is string with following format:
+/* sequenceData.rangeData.pos is string with following format:
  *
  *              "?-?" = unknown
  *              "n-n" = n-terminal range (to be represented as link to box beside n terminal)
@@ -19,9 +18,9 @@
  *              "123->256" = uncertain end between 256 and interactor.sequence.length
  */
 
-function AnnotatedRegion(name, polymer, sequenceDatumString, colour) {
-	this.name = name;
-	this.polymer = polymer;
+MI.model.AnnotatedRegion = function (featureName, participant, rangeDataPos) {
+	this.name = featureName;
+	this.participant = participant;
 	this.colour = colour;
 	sequenceDatumString = sequenceDatumString.trim();
 
@@ -53,6 +52,7 @@ function AnnotatedRegion(name, polymer, sequenceDatumString, colour) {
     }
 }
 
+/*
 AnnotatedRegion.prototype.toString = function(){
 	var string = "";
 	if (this.uncertainStart) string += this.uncertainStart + '..';
@@ -61,6 +61,9 @@ AnnotatedRegion.prototype.toString = function(){
 	if (this.uncertainEnd) string += '..' + this.uncertainEnd;
 	return string;
 }
+*/
+
+module.exports = MI.model.AnnotatedRegion;
 
 //On 06/06/13 09:22, marine@ebi.ac.uk wrote:
 //> Concerning the ranges, I think there was a confusion :
@@ -98,4 +101,3 @@ AnnotatedRegion.prototype.toString = function(){
 //> positions of the feature are <8 but it could happen that you have a
 //> feature such as "<8->22" or "<8-22", etc.
 
-module.exports = AnnotatedRegion;
