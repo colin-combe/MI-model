@@ -5,6 +5,9 @@
 
 "use strict";
 
+MI = MI || {};
+MI.model = MI.model || {};
+
 var AnnotatedRegion = require('./AnnotatedRegion');
 
 MI.model.Feature = function (json) {

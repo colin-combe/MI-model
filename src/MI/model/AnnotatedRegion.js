@@ -5,6 +5,10 @@
 
 "use strict";
 
+MI = MI || {};
+MI.model = MI.model || {};
+
+
 /* sequenceData.rangeData.pos is string with following format:
  *
  *              "?-?" = unknown

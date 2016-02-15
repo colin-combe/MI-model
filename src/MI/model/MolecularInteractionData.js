@@ -54,6 +54,8 @@
 				}
 			}
 
+			var participants = this.get("participants");
+
 			//create naryLinks and participants
 			if (this.options.expandStoichiometry === true) {
 				miJson = expandStoichiometry(miJson);
@@ -162,7 +164,7 @@
 					var interaction = data[l];
 					if (interaction.object === 'interaction') {
 						var jsonParticipants = interaction.participants;
-						var participantCount = jsonParticipants.length
+						var participantCount = jsonParticipants.length;
 
 						//init n-ary link
 						var nLinkId = getNaryLinkIdFromInteraction(interaction)
@@ -188,8 +190,8 @@
 							var participant = self.molecules.get(participantId);
 							if (typeof participant === 'undefined'){
 								var interactor = interactors.get(intRef);
-								participant = newMolecule(interactor, participantId);
-								self.molecules.set(participantId, participant);
+								participant = new Participant (participantId, interactor);
+								participants.set(participantId, participant);
 							}
 
 							participant.naryLinks.set(nLinkId, nLink);

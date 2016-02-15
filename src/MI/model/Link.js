@@ -5,6 +5,9 @@
 
 "use strict";
 
+MI = MI || {};
+MI.model = MI.model || {};
+
 MI.model.Link = function (){};
 
 MI.model.Link.prototype.addInteraction = function(interaction) {

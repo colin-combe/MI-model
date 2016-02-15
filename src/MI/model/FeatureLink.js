@@ -7,6 +7,9 @@
 
 var Link = require('./Link');
 
+MI = MI || {};
+MI.model = MI.model || {};
+
 MI.model.FeatureLink.prototype = new Link();
 
 function FeatureLink(id, fromFeature, toFeatures) {

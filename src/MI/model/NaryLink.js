@@ -7,6 +7,9 @@
 
 var Link = require('./Link');
 
+MI = MI || {};
+MI.model = MI.model || {};
+
 MI.model.NaryLink.prototype = new Link ();
 
 MI.model.NaryLink = function (id) {

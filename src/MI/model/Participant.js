@@ -5,6 +5,9 @@
 
 "use strict";
 
+MI = MI || {};
+MI.model = MI.model || {};
+
 MI.model.Participant = function (id, interactor) {
 	
 	this.id = id;
