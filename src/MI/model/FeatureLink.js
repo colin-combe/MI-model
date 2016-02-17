@@ -3,29 +3,27 @@
 //  authors: Colin Combe, Josh Heimbach
 //  MI.model.FeatureLink.js
 
-"use strict";
-
 var Link = require('./Link');
 
-MI = MI || {};
+var MI = MI || {};
 MI.model = MI.model || {};
 
-MI.model.FeatureLink.prototype = new Link();
+MI.model.FeatureLink = function (id, fromFeature, toFeatures) {
+	this.id = id;
+	this.fromFeature = fromFeature;//one feature
+	this.toFeatures = toFeatures;//array of features
 
-function FeatureLink(id, fromFeature, toFeatures) {
-    this.id = id;
-    this.fromFeature = fromFeature;//one feature
-    this.toFeatures = toFeatures;//array of features 
-    
-    this.participants = [];
-    for (annotatedRegion in this.fromFeature.annotatedRegions) {
+	this.participants = [];
+	for (annotatedRegion in this.fromFeature.annotatedRegions) {
 		this.participants.push(annotatedRegion.participant);
 	}
-    for (toFeature in this.toFeatures) {
+	for (toFeature in this.toFeatures) {
 		for (annotatedRegion in this.fromFeature.annotatedRegions) {
 			this.participants.push(annotatedRegion.participant);
 		}
 	}
 }
+
+MI.model.FeatureLink.prototype = new Link();
 
 module.exports = MI.model.FeatureLink;

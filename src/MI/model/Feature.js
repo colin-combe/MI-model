@@ -3,9 +3,7 @@
 //  authors: Colin Combe, Josh Heimbach
 //  MI.model.Feature.js
 
-"use strict";
-
-MI = MI || {};
+var MI = MI || {};
 MI.model = MI.model || {};
 
 var AnnotatedRegion = require('./AnnotatedRegion');
@@ -13,7 +11,7 @@ var AnnotatedRegion = require('./AnnotatedRegion');
 MI.model.Feature = function (json) {
 	this.controller = controller;
 	this.json = json;
-	
+
 	var featureName = "";
 	if (typeof json.name !== 'undefined') {
 		featureName += json.name + ', ';
@@ -37,9 +35,9 @@ MI.model.Feature = function (json) {
 			//~ }
 			var polymer = null;// TO BE FIXED  this.controller.molecules.get(mID);
 			//~ console.log(">-"+polymer.id + "\t" + seqDatum.pos);
-			
+
 			var annotatedRegion = new AnnotatedRegion(featureName, polymer, seqDatum.pos);
-			
+
 			this.annotatedRegions.push(annotatedRegion);
 		}
 	}

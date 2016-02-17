@@ -3,11 +3,8 @@
 //  authors: Colin Combe, Josh Heimbach
 //  MI.model.AnnotatedRegion.js
 
-"use strict";
-
-MI = MI || {};
+var MI = MI || {};
 MI.model = MI.model || {};
-
 
 /* sequenceData.rangeData.pos is string with following format:
  *
@@ -28,32 +25,32 @@ MI.model.AnnotatedRegion = function (featureName, participant, rangeDataPos) {
 	this.colour = colour;
 	sequenceDatumString = sequenceDatumString.trim();
 
-    this.uncertainStart = null;
-    this.start = '?';
-    this.end = '?';
-    this.uncertainEnd = null;
+	this.uncertainStart = null;
+	this.start = '?';
+	this.end = '?';
+	this.uncertainEnd = null;
 
-    var dashPosition = sequenceDatumString.indexOf('-');
-    var firstPart = sequenceDatumString.substring(0, dashPosition);
-    var secondPart = sequenceDatumString.substring(dashPosition + 1);
+	var dashPosition = sequenceDatumString.indexOf('-');
+	var firstPart = sequenceDatumString.substring(0, dashPosition);
+	var secondPart = sequenceDatumString.substring(dashPosition + 1);
 
-    if (firstPart.indexOf('.') === -1) {
-        this.start = firstPart;
-    }
-    else {
-        var firstDotPosition = firstPart.indexOf('.');
-        this.uncertainStart = firstPart.substring(0, firstDotPosition) * 1;
-        this.start = firstPart.substring(firstDotPosition + 2) * 1;
-    }
+	if (firstPart.indexOf('.') === -1) {
+		this.start = firstPart;
+	}
+	else {
+		var firstDotPosition = firstPart.indexOf('.');
+		this.uncertainStart = firstPart.substring(0, firstDotPosition) * 1;
+		this.start = firstPart.substring(firstDotPosition + 2) * 1;
+	}
 
-    if (secondPart.indexOf('.') === -1) {
-        this.end = secondPart;
-    }
-    else {
-        var firstDotPosition = secondPart.indexOf('.');
-        this.end = secondPart.substring(0, firstDotPosition) * 1;
-        this.uncertainEnd = secondPart.substring(firstDotPosition + 2) * 1;
-    }
+	if (secondPart.indexOf('.') === -1) {
+		this.end = secondPart;
+	}
+	else {
+		var firstDotPosition = secondPart.indexOf('.');
+		this.end = secondPart.substring(0, firstDotPosition) * 1;
+		this.uncertainEnd = secondPart.substring(firstDotPosition + 2) * 1;
+	}
 }
 
 /*
