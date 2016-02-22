@@ -4,6 +4,8 @@
 //  MI.model.MolecularInteractionData.js
 
 var Backbone = require('backbone');
+var $ = require('jquery');
+Backbone.$ = $;
 
 var Participant = require('./Participant');
 var NaryLink = require('./NaryLink');
