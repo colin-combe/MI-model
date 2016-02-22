@@ -21,7 +21,9 @@
     "grunt-contrib-jshint": "~0.10.0",
     "grunt-contrib-uglify": "*",
     "grunt-contrib-watch": "*",
-    "grunt-notify": "~0.3.1"
+    "grunt-notify": "~0.3.1",
+    "jquery": "^2.2.0",
+    "underscore": "^1.8.3"
   },
   "scripts": {
     "start": "node ./node_modules/grunt-cli/bin/grunt",
